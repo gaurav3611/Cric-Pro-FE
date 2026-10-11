@@ -1,0 +1,117 @@
+<div class="main-container" id="homeView" [style.display]="active() ? 'block' : 'none'">
+
+  <!-- Welcome banner -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h1>Welcome back, <span class="highlight" id="userName">{{ auth.displayName() }}</span></h1>
+      <p>Connect the bat sensor to record shots, or start the demo to try the dashboard on simulated swings.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="nav-btn accent" (click)="store.startDemoMode()"><app-icon name="play" />Start Demo</button>
+      <button class="nav-btn outline" (click)="store.connectBluetooth()"><app-icon name="bluetooth" />Connect Sensor</button>
+    </div>
+  </div>
+
+  <!-- Totals -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon"><app-icon name="calendar-days" /></div>
+      <div class="stat-label">Total Sessions</div>
+      <div class="stat-value" id="statSessions">{{ stats().sessions }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><app-icon name="gauge" /></div>
+      <div class="stat-label">Best Speed</div>
+      <div class="stat-value" id="statBestSpeed">{{ stats().bestSpeed }}<span class="unit">km/h</span></div>
+    </div>
+    <div class="stat-card off">
+      <div class="stat-icon"><app-icon name="arrow-right" /></div>
+      <div class="stat-label">Off Side Shots</div>
+      <div class="stat-value" id="statOffSide">{{ stats().offSide }}</div>
+    </div>
+    <div class="stat-card leg">
+      <div class="stat-icon"><app-icon name="arrow-left" /></div>
+      <div class="stat-label">Leg Side Shots</div>
+      <div class="stat-value" id="statLegSide">{{ stats().legSide }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><app-icon name="bat" /></div>
+      <div class="stat-label">Total Swings</div>
+      <div class="stat-value" id="statSwings">{{ stats().swings }}</div>
+    </div>
+  </div>
+
+  <!-- Recent shots, kept in the browser -->
+  <div class="card" id="homeShotsCard" style="margin-bottom:28px;" [style.display]="homeShotsVisible() ? null : 'none'">
+    <div class="card-header">
+      <div class="card-title">Recent Shots</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="card-badge" id="homeShotCount">{{ homeShotCount() }}</div>
+        <button class="nav-btn" (click)="clearShotHistory()" style="font-size:0.6rem;padding:5px 10px;">CLEAR</button>
+      </div>
+    </div>
+    <div class="shots-grid" id="homeShotsGrid" style="margin-top:12px;">
+      @for (shot of homeShots(); track $index) {
+        <div class="shot-card {{ shot.grade }}" (click)="openShot(shot)">
+          <div class="shot-number">Shot #{{ shot.number }}</div>
+          <div class="shot-speed">{{ shot.peakSpeed }}<span class="unit"> km/h</span></div>
+          <div class="shot-meta">Accuracy: {{ shot.accuracy }}% · {{ shot.direction.toUpperCase() }}</div>
+          <div class="shot-meta" style="color:var(--muted);font-size:0.62rem;">{{ timeLabel(shot) }}</div>
+          <div class="shot-direction-badge {{ shot.direction }}">{{ shot.direction.toUpperCase() }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <!-- Sessions from the API -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Session History</div>
+        <div class="card-badge" id="sessionCount">{{ sessionCount() }}</div>
+      </div>
+      <div id="sessionListContainer">
+        <div class="loading-state" id="sessionsLoading" [style.display]="sessionsState() === 'loading' ? null : 'none'">
+          <div class="spinner"></div>
+          <p>Loading sessions...</p>
+        </div>
+        <ul class="session-list" id="sessionList" [style.display]="sessionsState() === 'list' ? null : 'none'">
+          @for (session of sessions(); track $index) {
+            <li class="session-item">
+              <div class="session-icon"><app-icon name="bat" /></div>
+              <div class="session-info">
+                <h4>Session {{ session.id }}</h4>
+                <p>{{ session.line }}</p>
+              </div>
+              <div class="session-stats">
+                <div class="session-speed">{{ session.speed }} <span style="font-size:0.65rem;color:var(--muted)">km/h</span></div>
+                <div class="session-score" [attr.style]="session.scoreStyle">Score: {{ session.score }}/100</div>
+              </div>
+            </li>
+          }
+        </ul>
+        <div class="empty-state" id="noSessions" [style.display]="sessionsState() === 'empty' ? null : 'none'">
+          <div class="icon"><app-icon name="calendar-days" /></div>
+          <h3>No sessions to show</h3>
+          <p>Sessions are loaded from your account. Shots you record in this browser are listed under Recent Shots.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two ways to start -->
+    <div class="action-cards">
+      <div class="action-card ble-card" (click)="store.connectBluetooth()">
+        <div class="action-icon"><app-icon name="bluetooth" /></div>
+        <h3>Connect Sensor</h3>
+        <p>Switch on the bat sensor, then pick the device whose name starts with SwingLab. Needs Chrome or Edge.</p>
+        <button class="action-btn">CONNECT VIA BLUETOOTH</button>
+      </div>
+      <div class="action-card demo-card" (click)="store.startDemoMode()">
+        <div class="action-icon"><app-icon name="play" /></div>
+        <h3>Demo Mode</h3>
+        <p>Runs the dashboard on simulated swings, so you can try it without a sensor.</p>
+        <button class="action-btn">START DEMO</button>
+      </div>
+    </div>
+  </div>
+</div>

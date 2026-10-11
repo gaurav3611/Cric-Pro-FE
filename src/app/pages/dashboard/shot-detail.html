@@ -1,0 +1,24 @@
+<div class="shot-detail-overlay" [class.visible]="detail.visible()" id="shotDetailOverlay" (click)="onBackdrop($event)">
+  <div class="shot-detail-content" id="shotDetailContent">
+    <button class="shot-detail-close" aria-label="Close" (click)="detail.close()"><app-icon name="x" /></button>
+    <div class="shot-detail-header">
+      <h2 id="shotDetailTitle">{{ title() }}</h2>
+      <p id="shotDetailSub">{{ sub() }}</p>
+    </div>
+    <div class="shot-detail-metrics" id="shotDetailMetrics">
+      @if (detail.shot(); as shot) {
+        <div class="shot-detail-metric"><div class="label">Peak Speed</div><div class="value">{{ shot.peakSpeed.toFixed(1) }}<span class="unit"> km/h</span></div></div>
+        <div class="shot-detail-metric"><div class="label">Impact</div><div class="value">{{ shot.peakImpact.toFixed(1) }}<span class="unit"> g</span></div></div>
+        <div class="shot-detail-metric"><div class="label">Accuracy</div><div class="value">{{ shot.accuracy }}<span class="unit">%</span></div></div>
+        <div class="shot-detail-metric"><div class="label">Control</div><div class="value">{{ shot.controlScore }}<span class="unit">/100</span></div></div>
+      }
+    </div>
+    <div class="shot-detail-chart">
+      <div class="card-title">Speed Profile for this Shot</div>
+      <canvas id="shotDetailChart" #canvas height="100" [style.display]="noData() ? 'none' : null"></canvas>
+      @if (noData()) {
+        <div class="shot-detail-nodata" id="shotDetailNoData"><div><app-icon name="chart-line" /></div>No speed curve was saved with this shot. Shots you record now include one.</div>
+      }
+    </div>
+  </div>
+</div>

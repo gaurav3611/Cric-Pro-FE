@@ -1,0 +1,19 @@
+/*
+  Global styles are kept to one rule. The look of each page lives with that page:
+  pages/login/login-page.css and pages/dashboard/dashboard-page.css. Each is loaded only
+  while its page is shown.
+
+  The original pages were plain HTML with no wrapper elements, and the page stylesheets are
+  written for that structure. Angular adds one element per component, so these elements are
+  told not to form a box of their own. The CSS then sees the same parent and child
+  relationships as before. app-icon is not in this list: an icon is a box, and styles itself.
+*/
+app-root,
+app-toasts,
+app-login-page,
+app-dashboard-page,
+app-home-view,
+app-live-view,
+app-shot-detail {
+  display: contents;
+}

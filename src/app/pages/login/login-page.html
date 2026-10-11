@@ -1,0 +1,234 @@
+  <div class="auth-page">
+    <!-- ======== LEFT: what CricPro does ======== -->
+    <div class="auth-branding">
+      <div class="brand-content">
+        <div class="brand-icon"><app-icon name="bat" /></div>
+        <h1 class="brand-logo">CRIC<span>PRO</span></h1>
+        <p class="brand-tagline">
+          A motion sensor on the bat records every swing.
+          CricPro turns the readings into bat speed, impact and shot direction.
+        </p>
+
+        <!-- Every line here states something the dashboard really does. Keep it that way. -->
+        <div class="brand-features">
+          <div class="feature-item">
+            <div class="feature-icon"><app-icon name="gauge" /></div>
+            <div class="feature-text">
+              <strong>Bat speed</strong>
+              Peak speed of each shot in km/h, worked out from how fast the bat turns.
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><app-icon name="activity" /></div>
+            <div class="feature-text">
+              <strong>Impact and control</strong>
+              Peak impact in g, a control score out of 100 and an accuracy percentage.
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><app-icon name="compass" /></div>
+            <div class="feature-text">
+              <strong>Shot direction</strong>
+              Each shot is marked leg side, off side or straight.
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon"><app-icon name="bluetooth" /></div>
+            <div class="feature-text">
+              <strong>Sensor and browser</strong>
+              The sensor connects over Bluetooth in Chrome or Edge. A built-in demo works without it.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ======== RIGHT: the two forms ======== -->
+    <div class="auth-form-panel">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab" [class.active]="tab() === 'login'" data-tab="login" id="loginTab" (click)="selectTab('login')">Sign In</button>
+        <button class="auth-tab" [class.active]="tab() === 'register'" data-tab="register" id="registerTab" (click)="selectTab('register')">Create Account</button>
+      </div>
+      
+      <!-- ---- LOGIN FORM ---- -->
+      <div class="auth-form" [class.active]="tab() === 'login'" id="loginForm">
+        <h2 class="form-title">Sign in</h2>
+        <p class="form-subtitle">Your shots and sessions are on the dashboard.</p>
+        
+        <div class="auth-error" [class.visible]="loginErrorVisible()" id="loginError">{{ loginError() }}</div>
+        
+        <form id="loginFormEl" ngNativeValidate (ngSubmit)="onLogin()">
+          <div class="input-group">
+            <label class="input-label" for="loginEmail">Email Address</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><app-icon name="mail" /></span>
+              <input 
+                type="email" 
+                id="loginEmail" name="loginEmail" [(ngModel)]="loginEmail" 
+                class="input-field" 
+                placeholder="your@email.com" 
+                required 
+                autocomplete="email"
+              >
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label class="input-label" for="loginPassword">Password</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><app-icon name="lock" /></span>
+              <input 
+                [type]="showLoginPassword() ? 'text' : 'password'" 
+                id="loginPassword" name="loginPassword" [(ngModel)]="loginPassword" 
+                class="input-field" 
+                placeholder="Enter your password" 
+                required 
+                autocomplete="current-password"
+              >
+              <button type="button" class="password-toggle" [attr.aria-label]="showLoginPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showLoginPassword()" (click)="showLoginPassword.set(!showLoginPassword())"><app-icon [name]="showLoginPassword() ? 'eye-off' : 'eye'" /></button>
+            </div>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="rememberMe" checked>
+            <label for="rememberMe">Remember me</label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;" [disabled]="loginBusy()">
+            @if (loginBusy()) { <div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto;"></div> } @else { SIGN IN }
+          </button>
+        </form>
+        
+        <div class="form-divider">or continue with</div>
+        
+        <button class="google-btn" type="button" (click)="onGoogle()">
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Sign in with Google
+        </button>
+        
+        <div class="terms-text">
+          By signing in, you agree to our Terms of Service and Privacy Policy
+        </div>
+      </div>
+      
+      <!-- ---- REGISTER FORM ---- -->
+      <div class="auth-form" [class.active]="tab() === 'register'" id="registerForm">
+        <h2 class="form-title">Create an account</h2>
+        <p class="form-subtitle">You need a name, an email address and a password of at least 6 characters.</p>
+        
+        <div class="auth-error" [class.visible]="registerErrorVisible()" id="registerError">{{ registerError() }}</div>
+        
+        <form id="registerFormEl" ngNativeValidate (ngSubmit)="onRegister()">
+          <div class="form-row">
+            <div class="input-group">
+              <label class="input-label" for="registerName">Full Name *</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon"><app-icon name="user" /></span>
+                <input 
+                  type="text" 
+                  id="registerName" name="registerName" [(ngModel)]="registerName" 
+                  class="input-field" 
+                  placeholder="Your name" 
+                  required
+                  autocomplete="name"
+                >
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="registerTeam">Team / Club</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon"><app-icon name="users" /></span>
+                <input 
+                  type="text" 
+                  id="registerTeam" name="registerTeam" [(ngModel)]="registerTeam" 
+                  class="input-field" 
+                  placeholder="Optional"
+                >
+              </div>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label class="input-label" for="registerEmail">Email Address *</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon"><app-icon name="mail" /></span>
+              <input 
+                type="email" 
+                id="registerEmail" name="registerEmail" [(ngModel)]="registerEmail" 
+                class="input-field" 
+                placeholder="your@email.com" 
+                required
+                autocomplete="email"
+              >
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="input-group">
+              <label class="input-label" for="registerPassword">Password *</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon"><app-icon name="lock" /></span>
+                <input 
+                  [type]="showRegisterPassword() ? 'text' : 'password'" 
+                  id="registerPassword" name="registerPassword" [(ngModel)]="registerPassword" 
+                  class="input-field" 
+                  placeholder="Min 6 chars" 
+                  required 
+                  minlength="6"
+                  autocomplete="new-password"
+                >
+                <button type="button" class="password-toggle" [attr.aria-label]="showRegisterPassword() ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showRegisterPassword()" (click)="showRegisterPassword.set(!showRegisterPassword())"><app-icon [name]="showRegisterPassword() ? 'eye-off' : 'eye'" /></button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="registerConfirm">Confirm *</label>
+              <div class="input-icon-wrap">
+                <span class="input-icon"><app-icon name="lock" /></span>
+                <input 
+                  type="password" 
+                  id="registerConfirm" name="registerConfirm" [(ngModel)]="registerConfirm" 
+                  class="input-field" 
+                  placeholder="Re-enter" 
+                  required
+                  autocomplete="new-password"
+                >
+              </div>
+            </div>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="agreeTerms" required>
+            <label for="agreeTerms">I agree to the Terms of Service and Privacy Policy</label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;" [disabled]="registerBusy()">
+            @if (registerBusy()) { <div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0 auto;"></div> } @else { CREATE ACCOUNT }
+          </button>
+        </form>
+        
+        <div class="form-divider">or continue with</div>
+        
+        <button class="google-btn" type="button" (click)="onGoogle()">
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Sign up with Google
+        </button>
+        
+        <div class="form-footer">
+          Already have an account? <a href="#" (click)="selectTab('login'); $event.preventDefault()">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  

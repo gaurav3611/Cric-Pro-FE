@@ -1,0 +1,26 @@
+<header>
+  <div class="logo">
+    <div class="logo-icon"><app-icon name="bat" /></div>
+    SWING<span>LAB</span>
+  </div>
+  <div class="header-nav">
+    <button class="nav-btn" [class.active]="activeView() === 'home'" id="navHome" (click)="show('home')"><app-icon name="house" />Home</button>
+    <button class="nav-btn" [class.active]="activeView() === 'live'" id="navLive" (click)="show('live')"><app-icon name="radio" />Live</button>
+  </div>
+  <div class="header-right">
+    <div class="status-chip">
+      <div class="status-dot" [class.connected]="store.sensorOn()" id="bleDot"></div>
+      <span id="bleText">{{ store.sensorText() }}</span>
+    </div>
+    <div class="status-chip">
+      <div class="status-dot" [class.live]="store.statusLive()" id="statusDot"></div>
+      <span id="statusText">{{ store.statusText() }}</span>
+    </div>
+    <div class="user-avatar" id="userAvatar">{{ avatar() }}</div>
+    <button class="nav-btn danger" (click)="logout()" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<app-home-view [active]="activeView() === 'home'" />
+<app-live-view [active]="activeView() === 'live'" (back)="goBackHome()" />
+<app-shot-detail />

@@ -1,0 +1,185 @@
+<div class="main-container" id="liveView" [style.display]="active() ? 'block' : 'none'">
+  <div class="live-header">
+    <h2><div class="rec-dot" [class.on]="store.recording()"></div> LIVE SESSION <span id="liveMode" style="color:var(--muted);font-size:0.7rem;font-weight:400;margin-left:8px;">{{ store.liveMode() }}</span></h2>
+    <div class="live-controls">
+      <button class="btn btn-swing" id="startShotBtn" (click)="store.startShot()" [style.display]="store.recording() ? 'none' : null"><app-icon name="play" />START SHOT</button>
+      <button class="btn btn-stop" id="stopShotBtn" (click)="store.stopShot()" [style.display]="store.recording() ? null : 'none'"><app-icon name="square" />STOP &amp; SAVE SHOT</button>
+      <button class="btn btn-back" (click)="back.emit()"><app-icon name="arrow-left" />BACK</button>
+    </div>
+  </div>
+
+  <!-- Shot status -->
+  <div class="swing-control">
+    <div class="swing-info">
+      <h3 id="swingStatusText">{{ store.swingStatus() }}</h3>
+      <p id="swingHelpText">{{ store.swingHelp() }}</p>
+    </div>
+    <div class="shot-counter" id="shotCounterDisplay">{{ store.shotCount() }}</div>
+  </div>
+
+  <!-- The shots of this session -->
+  <div class="chart-card span4 shots-panel" id="shotsPanel" [style.display]="store.shotCount() ? null : 'none'">
+    <div class="card-title">Shot History: click a shot for details</div>
+    <div class="shots-grid" id="shotsGrid">
+      @for (shot of store.shots(); track shot.number) {
+        <div class="shot-card {{ shot.grade }}" (click)="detail.open(shot)">
+          <div class="shot-number">Shot #{{ shot.number }}</div>
+          <div class="shot-speed">{{ shot.peakSpeed.toFixed(1) }}<span class="unit"> km/h</span></div>
+          <div class="shot-meta">Accuracy: {{ shot.accuracy }}% · Impact: {{ shot.peakImpact.toFixed(1) }}g</div>
+          <div class="shot-direction-badge {{ shot.direction }}">{{ shot.direction.toUpperCase() }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="dashboard" id="dashboardGrid">
+    <div class="kpi-card" [class.active]="store.kpiActive()" id="kpiSpeed">
+      <div class="kpi-label">Swing Speed</div>
+      <div class="kpi-value" id="valSpeed">{{ store.kpi().speed }}<span class="kpi-unit">km/h</span></div>
+      <div class="kpi-sub">Peak angular velocity</div>
+      <div class="kpi-badge {{ store.badges().speed.cls }}" id="badgeSpeed">{{ store.badges().speed.text }}</div>
+    </div>
+    <div class="kpi-card" [class.active]="store.kpiActive()" id="kpiImpact">
+      <div class="kpi-label">Impact Strength</div>
+      <div class="kpi-value" id="valImpact">{{ store.kpi().impact }}<span class="kpi-unit">g</span></div>
+      <div class="kpi-sub">Peak acceleration burst</div>
+      <div class="kpi-badge {{ store.badges().impact.cls }}" id="badgeImpact">{{ store.badges().impact.text }}</div>
+    </div>
+    <div class="kpi-card" [class.active]="store.kpiActive()" id="kpiControl">
+      <div class="kpi-label">Bat Control</div>
+      <div class="kpi-value" id="valControl">{{ store.kpi().control }}</div>
+      <div class="kpi-sub">Rotation consistency</div>
+      <div class="kpi-badge {{ store.badges().control.cls }}" id="badgeControl">{{ store.badges().control.text }}</div>
+    </div>
+    <div class="kpi-card" [class.active]="store.kpiActive()" id="kpiFollow">
+      <div class="kpi-label">Follow Through</div>
+      <div class="kpi-value" id="valFollow">{{ store.kpi().follow }}</div>
+      <div class="kpi-sub">Post-impact motion</div>
+      <div class="kpi-badge {{ store.badges().follow.cls }}" id="badgeFollow">{{ store.badges().follow.text }}</div>
+    </div>
+
+    <div class="chart-card span3">
+      <div class="card-title">Session Speed Graph (km/h), All Shots</div>
+      <canvas id="speedChart" #speedCanvas height="100"></canvas>
+      <div class="chart-nav">
+        <button class="chart-nav-btn" (click)="scrollChartLeft()"><app-icon name="chevron-left" />Earlier</button>
+        <span class="chart-nav-info" id="chartNavInfo">{{ store.chartNavInfo() }}</span>
+        <button class="chart-nav-btn" (click)="scrollChartRight()">Later<app-icon name="chevron-right" /></button>
+        <button class="chart-nav-btn active" (click)="scrollChartToEnd()">LIVE</button>
+      </div>
+    </div>
+
+    <div class="chart-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div class="card-title" style="width:100%;">Swing Score</div>
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <circle class="ring-bg" cx="60" cy="60" r="50"/>
+          <circle class="ring-fill" id="scoreFill" cx="60" cy="60" r="50" [style.stroke-dashoffset]="store.score().offset" [style.stroke]="store.score().colour"/>
+        </svg>
+        <div class="score-num">
+          <span id="scoreNum">{{ store.score().num }}</span>
+          <span>/ 100</span>
+        </div>
+      </div>
+      <div style="font-size:0.68rem;color:var(--muted);text-align:center;letter-spacing:1px;" id="scoreLabel">{{ store.score().label }}</div>
+    </div>
+
+    <div class="chart-card span3">
+      <div class="card-title">3D Batsman Visualization</div>
+      <div id="threeContainer" #threeContainer></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-title">Gyroscope Axes</div>
+      <div class="axis-bars">
+        <div><div class="axis-label"><span class="axis-name" style="color:#ff2d55;">GX - Roll</span><span class="axis-val" id="gxVal">{{ store.axes().value.gx }}</span></div><div class="axis-track"><div class="axis-fill x" id="gxBar" [style.width]="store.axes().width.gx"></div></div></div>
+        <div><div class="axis-label"><span class="axis-name" style="color:#00d4ff;">GY - Pitch</span><span class="axis-val" id="gyVal">{{ store.axes().value.gy }}</span></div><div class="axis-track"><div class="axis-fill y" id="gyBar" [style.width]="store.axes().width.gy"></div></div></div>
+        <div><div class="axis-label"><span class="axis-name" style="color:#00ff88;">GZ - Yaw</span><span class="axis-val" id="gzVal">{{ store.axes().value.gz }}</span></div><div class="axis-track"><div class="axis-fill z" id="gzBar" [style.width]="store.axes().width.gz"></div></div></div>
+      </div>
+      <div style="height:14px;"></div>
+      <div class="card-title">Accelerometer</div>
+      <div class="axis-bars">
+        <div><div class="axis-label"><span class="axis-name" style="color:#ff2d55;">AX</span><span class="axis-val" id="axVal">{{ store.axes().value.ax }}</span></div><div class="axis-track"><div class="axis-fill x" id="axBar" [style.width]="store.axes().width.ax"></div></div></div>
+        <div><div class="axis-label"><span class="axis-name" style="color:#00d4ff;">AY</span><span class="axis-val" id="ayVal">{{ store.axes().value.ay }}</span></div><div class="axis-track"><div class="axis-fill y" id="ayBar" [style.width]="store.axes().width.ay"></div></div></div>
+        <div><div class="axis-label"><span class="axis-name" style="color:#00ff88;">AZ</span><span class="axis-val" id="azVal">{{ store.axes().value.az }}</span></div><div class="axis-track"><div class="axis-fill z" id="azBar" [style.width]="store.axes().width.az"></div></div></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="card-title">Shot Direction</div>
+      <div class="shot-direction-visual">
+        <div class="cricket-field">
+          <div class="field-line v"></div>
+          <div class="field-line h"></div>
+          <div class="field-sector leg" [class.active]="store.direction().active === 'leg'" id="sectorLeg"></div>
+          <div class="field-sector off" [class.active]="store.direction().active === 'off'" id="sectorOff"></div>
+          <div class="field-sector straight" [class.active]="store.direction().active === 'straight'" id="sectorStraight"></div>
+          <div class="bat-marker" id="batMarker" [style.left]="store.direction().left" [style.top]="store.direction().top"></div>
+        </div>
+      </div>
+      <div class="shot-label" id="shotLabel" [style.color]="store.direction().colour">{{ store.direction().label }}</div>
+    </div>
+
+    <div class="chart-card span2">
+      <div class="card-title">Acceleration Magnitude (g)</div>
+      <canvas id="accelChart" #accelCanvas height="90"></canvas>
+    </div>
+
+    <div class="chart-card span2">
+      <div class="card-title">Session Events</div>
+      <ul class="log-list" id="logList">
+        @for (entry of store.log(); track entry) {
+          <li class="log-item"><span class="log-icon"><app-icon [name]="entry.icon" /></span><span class="log-msg">{{ entry.message }}</span><span class="log-time">{{ entry.time }}</span></li>
+        }
+      </ul>
+    </div>
+
+    <!-- The session summary, shown once a shot has been saved. Its remarks come from fixed rules in swing-analysis.ts. -->
+    @if (store.summary(); as sum) {
+      <div class="chart-card span4" id="aiAnalysisCard">
+        <div class="card-title summary-title">SESSION SUMMARY</div>
+        <div class="summary-tiles">
+          <div class="summary-tile"><div class="label">SHOTS</div><div class="value">{{ sum.shots }}</div></div>
+          <div class="summary-tile"><div class="label">AVG SPEED</div><div class="value">{{ sum.avgSpeed.toFixed(1) }}</div></div>
+          <div class="summary-tile"><div class="label">BEST SPEED</div><div class="value good">{{ sum.bestSpeed.toFixed(1) }}</div></div>
+          <div class="summary-tile"><div class="label">AVG ACCURACY</div><div class="value gold">{{ sum.avgAccuracy.toFixed(0) }}%</div></div>
+          <div class="summary-tile"><div class="label">SCORE</div><div class="value" [class.good]="sum.overallScore >= 70" [class.fair]="sum.overallScore < 70">{{ sum.overallScore }}</div></div>
+        </div>
+        <div class="summary-columns">
+          <div>
+            <div class="summary-heading strengths"><app-icon name="check" /><span>STRENGTHS</span></div>
+            <ul class="summary-list">
+              @for (item of sum.analysis.strengths; track $index) {
+                <li>{{ item }}</li>
+              } @empty {
+                <li class="none">None recorded in this session.</li>
+              }
+            </ul>
+          </div>
+          <div>
+            <div class="summary-heading tips"><app-icon name="lightbulb" /><span>TIPS</span></div>
+            <ul class="summary-list">
+              @for (item of sum.analysis.tips; track $index) {
+                <li>{{ item }}</li>
+              } @empty {
+                <li class="none">No tips for this session.</li>
+              }
+            </ul>
+          </div>
+          <div>
+            <div class="summary-heading corrections"><app-icon name="triangle-alert" /><span>CORRECTIONS</span></div>
+            <ul class="summary-list">
+              @for (item of sum.analysis.corrections; track $index) {
+                <li>{{ item }}</li>
+              } @empty {
+                <li class="none">Nothing to correct.</li>
+              }
+            </ul>
+          </div>
+        </div>
+        <div class="summary-verdict">{{ sum.analysis.summary }}</div>
+        <div class="summary-basis">Rated on best speed, average impact and average accuracy. {{ sum.dataPoints }} readings, {{ sum.shots }} {{ sum.shots === 1 ? 'shot' : 'shots' }}.</div>
+      </div>
+    }
+  </div>
+</div>

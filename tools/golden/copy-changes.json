@@ -1,0 +1,188 @@
+{
+  "about": [
+    "Wording that this app changed on purpose, compared with the original dashboard.",
+    "tools/golden/original-dashboard.json is still the recording of the ORIGINAL page and is never edited.",
+    "Before comparing, tools/parity.mjs and the unit tests rewrite the recorded texts with the rules below,",
+    "so every number, class, colour and list entry is still checked against the original, and only these",
+    "phrases are allowed to differ. A rule replaces every occurrence of `from` with `to` in the probe named",
+    "by `where`. Rules run in order. A rule that matches nothing in the recording fails the parity check,",
+    "so this list cannot go stale. To change a text on screen: change it in the app and add or edit a rule here."
+  ],
+  "changes": [
+    {
+      "where": "text.swingStatusText",
+      "from": " SAVED — ",
+      "to": " SAVED: "
+    },
+    {
+      "where": "text.swingHelpText",
+      "from": "Click START SHOT, swing the bat, then click STOP to save the shot. Each start→stop = one shot.",
+      "to": "Click START SHOT, swing the bat, then click STOP & SAVE SHOT. Everything between the two clicks is saved as one shot."
+    },
+    {
+      "where": "text.swingHelpText",
+      "from": "Swing the bat now! Click STOP when done to save this shot.",
+      "to": "Swing the bat, then click STOP & SAVE SHOT."
+    },
+    {
+      "where": "text.swingHelpText",
+      "from": "Shot saved! Click START SHOT for the next one, or click a shot to review.",
+      "to": "Click START SHOT for the next one, or click a shot card to see its details."
+    },
+    {
+      "where": "text.chartNavInfo",
+      "from": "–",
+      "to": " to "
+    },
+    {
+      "where": "text.shotLabel",
+      "from": "—",
+      "to": "--"
+    },
+    {
+      "where": "text.shotDetailNoData",
+      "from": "📊Speed profile graph available only for live-recorded shots.Start a new shot to see the detailed graph.",
+      "to": "No speed curve was saved with this shot. Shots you record now include one."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "SESSION SUMMARY — AI COACH ANALYSIS",
+      "to": "SESSION SUMMARY"
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "✦ STRENGTHS",
+      "to": "STRENGTHS"
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "💡 TIPS",
+      "to": "TIPS"
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "⚠ CORRECTIONS",
+      "to": "CORRECTIONS"
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "Keep practicing!",
+      "to": "None recorded in this session."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "POWER HITTER: Exceptional bat speed!",
+      "to": "Best bat speed is above 80 km/h."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "Focus on timing to maximize consistency.",
+      "to": "Work on timing, so that the fastest shots are also the accurate ones."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "GOOD SPEED: Above average bat speed.",
+      "to": "Best bat speed is above 60 km/h."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "Increase shoulder rotation for +10-15km/h.",
+      "to": "Turn the shoulders further through the shot to add bat speed."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "SPEED TRAINING: Practice wrist snap drills.",
+      "to": "Best bat speed is between 40 and 60 km/h. Wrist-snap drills help to raise it."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "TECHNICAL FOCUS: Work on backlift and follow-through.",
+      "to": "Best bat speed is 40 km/h or less. Work on a full backlift and follow-through."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "IMPROVE TIMING: Hit the ball later for more power.",
+      "to": "Average impact is 15 g or less. Play the ball later for firmer contact."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "GRIP CHECK: Relax grip for smoother swing.",
+      "to": "Relax the grip. A tight grip makes the swing jerky."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "SWING PLANE: Keep bat straight during backlift.",
+      "to": "Keep the bat straight in the backlift."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "LEG SIDE: Good for boundaries.",
+      "to": "The last shot went to the leg side."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "OFF SIDE: Classic drive! Keep head still.",
+      "to": "The last shot went to the off side. Keep the head still through the drive."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "STRAIGHT DRIVE: Excellent option.",
+      "to": "The last shot was straight."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "GOOD PROGRESS! Keep practicing.",
+      "to": "Solid session. The tips above show where to improve."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "FOCUS ON FUNDAMENTALS: Build muscle memory with drills.",
+      "to": "Work on the basics first: grip, backlift and follow-through."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": "SwingLab AI Coach v2.0 | ",
+      "to": "Rated on best speed, average impact and average accuracy. "
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": " data points · 1 shots analyzed",
+      "to": " readings, 1 shot."
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": " data points · ",
+      "to": " readings, "
+    },
+    {
+      "where": "text.aiAnalysisCard",
+      "from": " shots analyzed",
+      "to": " shots."
+    },
+    {
+      "where": "lists.log",
+      "from": "🏏 SwingLab ready",
+      "to": "info SwingLab ready"
+    },
+    {
+      "where": "lists.log",
+      "from": "🏏 Shot #",
+      "to": "play Shot #"
+    },
+    {
+      "where": "lists.log",
+      "from": "✅ Shot #",
+      "to": "check Shot #"
+    },
+    {
+      "where": "lists.lastToast",
+      "from": " — swing now!",
+      "to": ""
+    },
+    {
+      "where": "lists.sessions",
+      "from": "🏏Session ",
+      "to": "Session "
+    }
+  ]
+}
