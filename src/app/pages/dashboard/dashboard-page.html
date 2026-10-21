@@ -11,6 +11,11 @@
     <div class="status-chip">
       <div class="status-dot" [class.connected]="store.sensorOn()" id="bleDot"></div>
       <span id="bleText">{{ store.sensorText() }}</span>
+      @if (store.trackBattery()) {
+        @if (store.batteryPercent(); as percent) {
+          <span id="bleBattery" [class.low]="percent <= 10" title="Battery">{{ percent }}%</span>
+        }
+      }
     </div>
     <div class="status-chip">
       <div class="status-dot" [class.live]="store.statusLive()" id="statusDot"></div>

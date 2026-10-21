@@ -271,7 +271,7 @@ function differences(expected, actual, path, out) {
 
 /**
  * What the Angular app should show where the original showed `page`: the same, with the wording
- * changes of copy-changes.json applied. `used` collects the rules that changed something.
+ * changes of copy-changes.json applied. The same rules run on the recorded internals, for the chart colours. `used` collects the rules that changed something.
  */
 function reworded(page, changes, used) {
   const out = structuredClone(page);
@@ -326,7 +326,8 @@ if (mode === "record") {
       const actual = result.steps[i];
       const diffs = [];
       const expectedPage = reworded(expected.page, changes, usedChanges);
-      if (!actual) diffs.push("step missing"); else differences({ page: expectedPage, internals: expected.internals }, { page: actual.page, internals: actual.internals }, "", diffs);
+      const expectedInternals = expected.internals && reworded(expected.internals, changes, usedChanges);
+      if (!actual) diffs.push("step missing"); else differences({ page: expectedPage, internals: expectedInternals }, { page: actual.page, internals: actual.internals }, "", diffs);
       if (diffs.length) { failed++; console.log(`DIFFERENT  step ${i + 1}: ${expected.name}`); diffs.slice(0, 12).forEach(d => console.log("    " + d)); if (diffs.length > 12) console.log(`    ...and ${diffs.length - 12} more`); }
     });
     result.problems.forEach(p => console.log("PAGE ERROR  " + p));

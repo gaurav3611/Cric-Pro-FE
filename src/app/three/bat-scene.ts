@@ -52,7 +52,7 @@ export class BatScene {
     this.container = container;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x020610, 0.03);
+    scene.fog = new THREE.FogExp2(0xf0f3ec, 0.03);
     this.scene = scene;
 
     const height = container.offsetHeight || 420;
@@ -64,11 +64,11 @@ export class BatScene {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.offsetWidth, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x020610, 1);
+    renderer.setClearColor(0xf0f3ec, 1); // the sage of the page
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6;
+    renderer.toneMappingExposure = 1.1;
     container.appendChild(renderer.domElement);
     this.renderer = renderer;
 
@@ -151,27 +151,27 @@ export class BatScene {
   }
 
   private setupLighting(scene: THREE.Scene): void {
-    scene.add(new THREE.AmbientLight(0x2a3a54, 3.0));
+    scene.add(new THREE.AmbientLight(0xffffff, 2.2));
 
     // Key light: warm white from the front right.
-    const key = new THREE.DirectionalLight(0xfff8ee, 3.0);
+    const key = new THREE.DirectionalLight(0xfff8ee, 2.4);
     key.position.set(3, 5, 6);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     scene.add(key);
 
     // Fill: warm, from the left.
-    const fill = new THREE.PointLight(0xffaa66, 1.5, 12);
+    const fill = new THREE.PointLight(0xffe2b8, 0.8, 12);
     fill.position.set(-4, 2, 3);
     scene.add(fill);
 
-    // Rim: cool cyan from behind.
-    const rim = new THREE.PointLight(0x00d4ff, 2.0, 10);
+    // Rim: soft green from behind, the colour of the ground.
+    const rim = new THREE.PointLight(0x9fc4a8, 1.0, 10);
     rim.position.set(0, 0, -5);
     scene.add(rim);
 
-    // From below: a little blue, so the underside of the bat is not black.
-    const under = new THREE.PointLight(0x1e5a9a, 0.5, 6);
+    // From below, so the underside of the bat is not dark.
+    const under = new THREE.PointLight(0xdfe6d8, 0.5, 6);
     under.position.set(0, -3, 1);
     scene.add(under);
   }
@@ -180,12 +180,12 @@ export class BatScene {
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(16, 16),
       new THREE.MeshPhongMaterial({
-        color: 0x010308,
+        color: 0xe4ecdf,
         transparent: true,
         opacity: 0.9,
         side: THREE.DoubleSide,
         shininess: 100,
-        specular: 0x112233,
+        specular: 0x222222,
       }),
     );
     ground.rotation.x = -Math.PI / 2;
@@ -193,11 +193,11 @@ export class BatScene {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(12, 48, 0x00d4ff, 0x081420);
+    const grid = new THREE.GridHelper(12, 48, 0x1e5b3a, 0xb9c7b3);
     grid.position.y = -1.99;
     const gridMaterial = grid.material as THREE.Material;
     gridMaterial.transparent = true;
-    gridMaterial.opacity = 0.1;
+    gridMaterial.opacity = 0.35;
     scene.add(grid);
   }
 
@@ -216,14 +216,14 @@ export class BatScene {
     const willowEdgeMat = new THREE.MeshPhongMaterial({ color: 0xe5d0a8, shininess: 35 });
     const spineMat = new THREE.MeshPhongMaterial({ color: 0xd8c49a, shininess: 30 });
     const caneMat = new THREE.MeshPhongMaterial({ color: 0xc4a87a, shininess: 50 });
-    const gripMat = new THREE.MeshPhongMaterial({ color: 0x3a4055, shininess: 30 });
+    const gripMat = new THREE.MeshPhongMaterial({ color: 0x1e5b3a, shininess: 30 });
     const gripChevMat = new THREE.MeshBasicMaterial({
-      color: 0x8090a0,
+      color: 0x8fb39a,
       transparent: true,
       opacity: 0.5,
     });
     const stickerBgMat = new THREE.MeshBasicMaterial({
-      color: 0x0a1e3d,
+      color: 0x1e5b3a,
       transparent: true,
       opacity: 0.85,
       side: THREE.DoubleSide,
@@ -344,8 +344,8 @@ export class BatScene {
     this.sweetSpot = new THREE.Mesh(
       new THREE.SphereGeometry(0.04, 14, 14),
       new THREE.MeshPhongMaterial({
-        color: 0xff6b00,
-        emissive: 0xff3300,
+        color: 0xa8620f,
+        emissive: 0x5a3000,
         emissiveIntensity: 0.3,
         transparent: true,
         opacity: 0.4,
@@ -406,19 +406,19 @@ export class BatScene {
     if (!this.toeMarker) {
       this.toeMarker = new THREE.Mesh(
         new THREE.SphereGeometry(0.03, 10, 10),
-        new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+        new THREE.MeshBasicMaterial({ color: 0xb42318 }),
       );
       scene.add(this.toeMarker);
     }
     this.toeMarker.position.copy(toeWorld);
 
-    // Leave a red dot wherever the toe has moved to. The dots stay until reset().
+    // Leave a dot wherever the toe has moved to. The dots stay until reset().
     const distance = this.lastTrailPoint ? toeWorld.distanceTo(this.lastTrailPoint) : 999;
     if (distance > 0.003) {
       this.lastTrailPoint = toeWorld.clone();
       const dot = new THREE.Mesh(
         new THREE.SphereGeometry(0.02, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0xff2222 }),
+        new THREE.MeshBasicMaterial({ color: 0xb42318 }),
       );
       dot.position.copy(toeWorld);
       dot.userData['isTrail'] = true;

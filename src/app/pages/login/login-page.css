@@ -11,23 +11,30 @@
 */
 
 :root {
-  /* Colours */
-  --bg-primary: #060b14;
-  --bg-secondary: #0a1120;
-  --bg-input: #0d1a2e;
+  /* Colours: the same "Ground" palette as the dashboard (see dashboard-page.css). */
+  --bg-primary: #f7f5ee;   /* the page: warm ivory */
+  --bg-secondary: #ffffff; /* the form panel */
+  --bg-input: #ffffff;
+  --bg-sage: #f0f3ec;
 
-  --accent-cyan: #00d4ff;
-  --accent-orange: #ff6b00;
-  --accent-green: #00ff88;
-  --accent-red: #ff2d55;
-  --accent-red-dim: rgba(255, 45, 85, 0.15);
+  --accent-cyan: #1e5b3a;  /* forest: the brand and the main action. The name is the original's. */
+  --accent-hover: #164a2e;
+  --accent-soft: #e3eee6;
+  --accent-orange: #a8620f;
+  --accent-green: #3a8a3f;
+  --accent-red: #b42318;
+  --accent-red-dim: #fbe9e7;
 
-  --text-primary: #e4ecf7;
-  --text-secondary: #7a8faa;
-  --text-muted: #4a5f7a;
+  --text-primary: #17241c;
+  --text-secondary: #46554b;
+  --text-muted: #5a695f;
 
-  --border-subtle: rgba(30, 60, 100, 0.4);
-  --border-active: rgba(0, 212, 255, 0.5);
+  --border-subtle: #dcdfd4;
+  --border-active: #1e5b3a;
+  --line: #c9d3c4;
+
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 
   /* Spacing */
   --space-xs: 4px;
@@ -58,7 +65,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
@@ -76,8 +83,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent-cyan); o
 
 /* ---- Typography ---- */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 1px;
+  font-family: var(--font-display);
+  font-weight: 600;
 }
 
 a {
@@ -85,15 +92,15 @@ a {
   text-decoration: none;
   transition: color var(--transition-fast);
 }
-a:hover { color: #66e0ff; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
 
 /* ---- Buttons ---- */
 .btn {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  padding: 12px 32px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 12px 28px;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -106,9 +113,9 @@ a:hover { color: #66e0ff; }
 
 .btn-primary {
   background: var(--accent-cyan);
-  color: #000;
+  color: #ffffff;
 }
-.btn-primary:hover { background: #4de1ff; }
+.btn-primary:hover { background: var(--accent-hover); }
 .btn-primary:disabled { background: var(--accent-cyan); opacity: 0.6; cursor: default; }
 
 /* ---- Input Fields ---- */
@@ -119,8 +126,8 @@ a:hover { color: #66e0ff; }
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   outline: none;
 }
@@ -131,17 +138,15 @@ a:hover { color: #66e0ff; }
 
 .input-field:focus {
   border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .input-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+  margin-bottom: 6px;
 }
 
 .input-group {
@@ -166,7 +171,7 @@ a:hover { color: #66e0ff; }
 /* ---- Toast Notifications ---- */
 .toast-container {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   z-index: 10000;
   display: flex;
@@ -184,28 +189,22 @@ a:hover { color: #66e0ff; }
   gap: 10px;
   border: 1px solid;
   min-width: 280px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(23,36,28,0.12);
+  background: #ffffff;
+  color: var(--text-primary);
+  border-left-width: 4px;
 }
 .toast app-icon { font-size: 1.05rem; }
 
 /* Solid backgrounds: a toast can land on top of a button, and its text has to stay readable. */
-.toast-success {
-  background: #0b302c;
-  border-color: rgba(0, 255, 136, 0.3);
-  color: var(--accent-green);
-}
+.toast-success { border-color: var(--border-subtle); border-left-color: var(--accent-green); }
+.toast-success app-icon { color: var(--accent-green); }
 
-.toast-error {
-  background: #2b1419;
-  border-color: rgba(255, 45, 85, 0.3);
-  color: var(--accent-red);
-}
+.toast-error { border-color: var(--border-subtle); border-left-color: var(--accent-red); }
+.toast-error app-icon { color: var(--accent-red); }
 
-.toast-info {
-  background: #0b2b3b;
-  border-color: rgba(0, 212, 255, 0.3);
-  color: var(--accent-cyan);
-}
+.toast-info { border-color: var(--border-subtle); border-left-color: var(--accent-cyan); }
+.toast-info app-icon { color: var(--accent-cyan); }
 
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
@@ -226,6 +225,7 @@ a:hover { color: #66e0ff; }
 }
 
 /* ---- Left panel: what CricPro does ---- */
+/* A boundary arc and the 30-yard circle run off its upper right corner, clear of the text. */
 .auth-branding {
   flex: 1;
   display: flex;
@@ -234,67 +234,81 @@ a:hover { color: #66e0ff; }
   align-items: center;
   padding: var(--space-2xl);
   background: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+.auth-branding::before {
+  content: '';
+  position: absolute; right: -420px; top: -460px;
+  width: 760px; height: 760px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  outline: 1px dashed var(--line); outline-offset: -110px;
+  pointer-events: none;
 }
 
 .brand-content {
-  text-align: center;
-  max-width: 500px;
+  position: relative;
+  text-align: left;
+  max-width: 520px;
 }
 
 /* The mark: a bat and ball in a square tile. */
 .brand-icon {
   width: 76px;
   height: 76px;
-  margin: 0 auto var(--space-lg);
+  margin: 0 0 var(--space-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.6rem;
-  color: var(--accent-cyan);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
+  font-size: 2.4rem;
+  color: #ffffff;
+  background: var(--accent-cyan);
   border-radius: var(--radius-lg);
 }
 
 /* Two colours, like the SWINGLAB mark on the dashboard. */
 .brand-logo {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3.5rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   margin-bottom: var(--space-md);
-  line-height: 1.1;
-  color: var(--accent-cyan);
+  line-height: 1.05;
+  color: var(--text-primary);
 }
-.brand-logo span { color: var(--accent-orange); }
+.brand-logo span { color: var(--accent-cyan); }
 
 .brand-tagline {
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
   color: var(--text-secondary);
-  margin-bottom: var(--space-xl);
-  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+  line-height: 1.5;
 }
 
 .brand-features {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-xl);
+  gap: 0;
+  margin-top: var(--space-lg);
   text-align: left;
+  border-top: 3px double var(--line);
 }
 
+/* A list, ruled like a scorecard, not a stack of cards. */
 .feature-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-md);
-  padding: var(--space-md) var(--space-lg);
-  background: rgba(0, 212, 255, 0.04);
-  border: 1px solid rgba(0, 212, 255, 0.1);
-  border-radius: var(--radius-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .feature-icon {
-  font-size: 1.4rem;
-  width: 40px;
+  font-size: 1.2rem;
+  width: 28px;
+  padding-top: 2px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
@@ -302,8 +316,9 @@ a:hover { color: #66e0ff; }
 }
 
 .feature-text {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .feature-text strong {
@@ -330,37 +345,37 @@ a:hover { color: #66e0ff; }
   display: flex;
   gap: 0;
   margin-bottom: var(--space-xl);
-  background: var(--bg-primary);
-  border-radius: var(--radius-md);
-  padding: 4px;
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .auth-tab {
   flex: 1;
   padding: 12px;
   text-align: center;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 2px;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+  border-radius: 0;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
   border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   background: transparent;
-  text-transform: uppercase;
 }
 
+/* The current tab: an underline in the brand colour. */
 .auth-tab.active {
-  background: var(--accent-cyan);
-  color: #000;
+  color: var(--accent-cyan);
+  border-bottom-color: var(--accent-cyan);
 }
 
 .auth-tab:not(.active):hover {
   color: var(--text-primary);
-  background: rgba(0, 212, 255, 0.08);
 }
 
 .auth-form {
@@ -372,9 +387,9 @@ a:hover { color: #66e0ff; }
 }
 
 .form-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.3rem;
-  margin-bottom: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin-bottom: var(--space-xs);
   color: var(--text-primary);
 }
 
@@ -451,7 +466,7 @@ a:hover { color: #66e0ff; }
 .google-btn {
   width: 100%;
   padding: 14px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -463,12 +478,12 @@ a:hover { color: #66e0ff; }
   justify-content: center;
   gap: 10px;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-ui);
 }
 
 .google-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--bg-sage);
+  border-color: var(--text-muted);
 }
 
 .google-btn svg {
@@ -500,10 +515,11 @@ a:hover { color: #66e0ff; }
 .auth-error {
   padding: 12px 16px;
   background: var(--accent-red-dim);
-  border: 1px solid rgba(255, 45, 85, 0.3);
+  border: 1px solid var(--accent-red-dim);
+  border-left: 4px solid var(--accent-red);
   border-radius: var(--radius-md);
   color: var(--accent-red);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   margin-bottom: var(--space-lg);
   display: none;
 }

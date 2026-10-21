@@ -17,6 +17,7 @@ import { BatScene } from '../../three/bat-scene';
 import { LiveSessionStore } from './live-session.store';
 import { ParityProbe } from './parity-probe';
 import { ShotDetailService } from './shot-detail.service';
+import { PALETTE, withAlpha } from '../../shared/palette';
 
 type LineChart = Chart<'line', number[], number | string>;
 
@@ -136,11 +137,11 @@ export class LiveView implements OnDestroy {
 
     // An orange dot marks the fastest reading of each shot.
     const pointRadii = new Array<number>(visible.length).fill(0);
-    const pointColours = new Array<string>(visible.length).fill('rgba(0,212,255,0.8)');
+    const pointColours = new Array<string>(visible.length).fill(withAlpha(PALETTE.accent, 0.8));
     shots.forEach((shot) => {
       if (shot.peakIndex >= start && shot.peakIndex < end) {
         pointRadii[shot.peakIndex - start] = 6;
-        pointColours[shot.peakIndex - start] = '#ff6b00';
+        pointColours[shot.peakIndex - start] = PALETTE.ochre;
       }
     });
     dataset.pointRadius = pointRadii;
@@ -201,14 +202,14 @@ export class LiveView implements OnDestroy {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(12,20,35,0.95)',
-          titleColor: '#00d4ff',
-          bodyColor: '#e0eaf5',
-          borderColor: 'rgba(30,65,110,0.5)',
+          backgroundColor: PALETTE.surface,
+          titleColor: PALETTE.accent,
+          bodyColor: PALETTE.ink,
+          borderColor: PALETTE.border,
           borderWidth: 1,
           padding: 10,
           cornerRadius: 8,
-          titleFont: { family: 'Orbitron', size: 11 },
+          titleFont: { family: 'Inter', size: 11, weight: 600 },
           bodyFont: { family: 'Inter', size: 12 },
           callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y },
         },
@@ -217,9 +218,9 @@ export class LiveView implements OnDestroy {
         x: { display: false },
         y: {
           min: 0,
-          grid: { color: 'rgba(26,58,92,0.3)' },
-          ticks: { color: '#4a6a8a', font: { size: 10 } },
-          border: { color: 'rgba(26,58,92,0.3)' },
+          grid: { color: withAlpha(PALETTE.ink, 0.07) },
+          ticks: { color: PALETTE.muted, font: { size: 10 } },
+          border: { color: PALETTE.border },
         },
       },
     };
@@ -232,8 +233,8 @@ export class LiveView implements OnDestroy {
           {
             label: 'Speed (km/h)',
             data: [],
-            borderColor: '#00d4ff',
-            backgroundColor: 'rgba(0,212,255,0.06)',
+            borderColor: PALETTE.accent,
+            backgroundColor: withAlpha(PALETTE.accent, 0.06),
             borderWidth: 2,
             pointRadius: 0,
             pointHoverRadius: 5,
@@ -253,8 +254,8 @@ export class LiveView implements OnDestroy {
           {
             label: 'Accel (g)',
             data: [],
-            borderColor: '#ff6b00',
-            backgroundColor: 'rgba(255,107,0,0.06)',
+            borderColor: PALETTE.ochre,
+            backgroundColor: withAlpha(PALETTE.ochre, 0.06),
             borderWidth: 2,
             pointRadius: 0,
             tension: 0.35,

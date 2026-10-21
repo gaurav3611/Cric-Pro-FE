@@ -13,6 +13,7 @@ import Chart from 'chart.js/auto';
 import { Icon } from '../../shared/icon';
 import { ParityProbe } from './parity-probe';
 import { DetailShot, ShotDetailService } from './shot-detail.service';
+import { PALETTE, withAlpha } from '../../shared/palette';
 
 /** The window with one shot's numbers and its speed curve. */
 @Component({
@@ -81,7 +82,7 @@ export class ShotDetail implements OnDestroy {
   private draw(shot: DetailShot): void {
     const profile = shot.speedProfile;
     const peakIdx = profile.indexOf(Math.max(...profile));
-    const pointColours = profile.map((_, i) => (i === peakIdx ? '#ff6b00' : 'transparent'));
+    const pointColours = profile.map((_, i) => (i === peakIdx ? PALETTE.ochre : 'transparent'));
 
     this.chart = new Chart(this.canvas().nativeElement, {
       type: 'line',
@@ -91,8 +92,8 @@ export class ShotDetail implements OnDestroy {
           {
             label: 'Speed (km/h)',
             data: profile.map((s) => +(typeof s === 'number' ? s : 0).toFixed(1)),
-            borderColor: '#00d4ff',
-            backgroundColor: 'rgba(0,212,255,0.08)',
+            borderColor: PALETTE.accent,
+            backgroundColor: withAlpha(PALETTE.accent, 0.08),
             borderWidth: 2,
             pointRadius: profile.map((_, i) => (i === peakIdx ? 8 : 0)),
             pointBackgroundColor: pointColours,
@@ -108,10 +109,10 @@ export class ShotDetail implements OnDestroy {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(12,20,35,0.95)',
-            titleColor: '#00d4ff',
-            bodyColor: '#e0eaf5',
-            borderColor: 'rgba(30,65,110,0.5)',
+            backgroundColor: PALETTE.surface,
+            titleColor: PALETTE.accent,
+            bodyColor: PALETTE.ink,
+            borderColor: PALETTE.border,
             borderWidth: 1,
             padding: 10,
             cornerRadius: 8,
@@ -121,9 +122,9 @@ export class ShotDetail implements OnDestroy {
           x: { display: false },
           y: {
             min: 0,
-            grid: { color: 'rgba(26,58,92,0.3)' },
-            ticks: { color: '#4a6a8a' },
-            border: { color: 'rgba(26,58,92,0.3)' },
+            grid: { color: withAlpha(PALETTE.ink, 0.07) },
+            ticks: { color: PALETTE.muted },
+            border: { color: PALETTE.border },
           },
         },
       },

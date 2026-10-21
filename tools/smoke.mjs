@@ -49,7 +49,7 @@ try {
   await chrome.until("!!document.getElementById('loginFormEl')");
   expectEqual("the start address leads to the login page", await hash(), "#/login");
   expectEqual("the login page has its title", await chrome.js("document.title"), "CricPro | Cricket Bat Swing Analyzer");
-  check("the login stylesheet is applied", await chrome.js("getComputedStyle(document.querySelector('.brand-logo')).fontFamily.includes('Orbitron')"));
+  check("the login stylesheet is applied", await chrome.js("getComputedStyle(document.querySelector('.brand-logo')).fontFamily.includes('Source Serif 4')"));
   expectEqual("the left panel lists four things the product does, each with a drawn icon",
     await chrome.js("[...document.querySelectorAll('.feature-item')].map(f => f.querySelector('svg[data-icon] > *') instanceof SVGElement && f.querySelector('strong').textContent.trim())"),
     ["Bat speed", "Impact and control", "Shot direction", "Sensor and browser"]);

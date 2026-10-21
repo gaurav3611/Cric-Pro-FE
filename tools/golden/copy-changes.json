@@ -6,7 +6,8 @@
     "so every number, class, colour and list entry is still checked against the original, and only these",
     "phrases are allowed to differ. A rule replaces every occurrence of `from` with `to` in the probe named",
     "by `where`. Rules run in order. A rule that matches nothing in the recording fails the parity check,",
-    "so this list cannot go stale. To change a text on screen: change it in the app and add or edit a rule here."
+    "so this list cannot go stale. To change a text on screen: change it in the app and add or edit a rule here.",
+    "Rules on style.ring, style.shotLabel and chart.colours replace a colour of the original's dark theme with the one that took its place in the light \"Ground\" theme (src/app/shared/palette.ts). Only that swap is allowed: where the original showed a colour, this app must show its replacement."
   ],
   "changes": [
     {
@@ -183,6 +184,46 @@
       "where": "lists.sessions",
       "from": "🏏Session ",
       "to": "Session "
+    },
+    {
+      "where": "style.ring",
+      "from": "rgb(0, 255, 136)",
+      "to": "rgb(58, 138, 63)"
+    },
+    {
+      "where": "style.ring",
+      "from": "rgb(0, 212, 255)",
+      "to": "rgb(30, 91, 58)"
+    },
+    {
+      "where": "style.ring",
+      "from": "rgb(255, 107, 0)",
+      "to": "rgb(168, 98, 15)"
+    },
+    {
+      "where": "style.shotLabel",
+      "from": "rgb(0, 212, 255)",
+      "to": "rgb(43, 91, 134)"
+    },
+    {
+      "where": "style.shotLabel",
+      "from": "rgb(255, 107, 0)",
+      "to": "rgb(168, 98, 15)"
+    },
+    {
+      "where": "style.shotLabel",
+      "from": "rgb(0, 255, 136)",
+      "to": "rgb(58, 138, 63)"
+    },
+    {
+      "where": "chart.colours",
+      "from": "rgba(0,212,255,0.8)",
+      "to": "rgba(30,91,58,0.8)"
+    },
+    {
+      "where": "chart.colours",
+      "from": "#ff6b00",
+      "to": "#a8620f"
     }
   ]
 }

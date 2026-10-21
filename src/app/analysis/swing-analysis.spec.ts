@@ -12,6 +12,7 @@ import {
   summariseSession,
   swingScore,
 } from './swing-analysis';
+import { PALETTE } from '../shared/palette';
 
 describe('swing analysis, against the recording of the original dashboard', () => {
   // Run every recorded shot through the functions the way the live session does.
@@ -269,12 +270,20 @@ describe('swing analysis, rules', () => {
     expect(swingScore(0, 0)).toEqual({
       score: 0,
       offset: 314,
-      colour: '#ff6b00',
+      colour: PALETTE.ochre,
       label: 'NEEDS WORK',
     });
-    expect(swingScore(100, 50)).toMatchObject({ score: 80, colour: '#00ff88', label: 'POWER HIT' });
+    expect(swingScore(100, 50)).toMatchObject({
+      score: 80,
+      colour: PALETTE.green,
+      label: 'POWER HIT',
+    });
     expect(swingScore(500, 500)).toMatchObject({ score: 100, offset: 0, label: 'POWER HIT' });
-    expect(swingScore(60, 35)).toMatchObject({ score: 50, colour: '#00d4ff', label: 'GOOD FORM' });
+    expect(swingScore(60, 35)).toMatchObject({
+      score: 50,
+      colour: PALETTE.accent,
+      label: 'GOOD FORM',
+    });
   });
 
   it('sizes the axis bars', () => {

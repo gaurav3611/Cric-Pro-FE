@@ -6,6 +6,8 @@
  * app shows with the numbers the original dashboard showed.
  */
 
+import { PALETTE } from '../shared/palette';
+
 /** One reading from the bat. Acceleration in g, rotation in degrees per second. */
 export interface SensorSample {
   ax: number;
@@ -278,7 +280,7 @@ const SCORE_LABELS = ['NEEDS WORK', 'DEVELOPING', 'GOOD FORM', 'EXCELLENT', 'POW
 /** The number in the score ring, from a speed and a second measure. */
 export function swingScore(speed: number, metric2: number): SwingScore {
   const score = Math.min(100, Math.round(speed * 0.6 + metric2 * 0.4));
-  const colour = score >= 80 ? '#00ff88' : score >= 50 ? '#00d4ff' : '#ff6b00';
+  const colour = score >= 80 ? PALETTE.green : score >= 50 ? PALETTE.accent : PALETTE.ochre;
   return {
     score,
     offset: 314 - (score / 100) * 314,

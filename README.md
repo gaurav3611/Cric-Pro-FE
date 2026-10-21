@@ -1,5 +1,7 @@
 # Cric-Pro-FE
 
+**Version 0.2.0.** What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+
 The frontend of SwingLab, a cricket bat swing analyzer, written as an Angular single-page app. Its login page carries the name CricPro.
 
 It is a rewrite of the plain HTML and JavaScript frontend in the [Cricket](https://github.com/gaurav3611/Cricket) repository, `frontend/index.html` and `frontend/dashboard.html`. It behaves the same: every number, list and state the dashboard displays is checked against a recording of the original. Its look and its wording were then reworked on purpose, see [Design rules](#design-rules).
@@ -149,7 +151,7 @@ The original look leaned on purple gradients, pill shapes, emoji, glowing hover 
 
 | Rule | What it replaced |
 |---|---|
-| Colours are flat. No purple, no gradients. A colour means the same thing everywhere: cyan for speed, the leg side and the main action, orange for the off side, green for straight and good, red for stop and poor. | Purple buttons and bars, gradient fills on buttons, headings and bars, a tinted page background, neon glows |
+| Colours are flat. No purple, no gradients. The look is light first, the "Ground" theme: warm ivory and forest green. A colour means the same thing everywhere: forest green for the brand, the main action and bat speed, field green for straight and good, ochre for the off side and a fair result, slate blue for the leg side, red for stop and poor. | Purple buttons and bars, gradient fills on buttons, headings and bars, a tinted page background, neon glows |
 | Corners are 4, 6 or 8 pixels. Only what is round by nature is a circle: status lights, the avatar, the spinner, the cricket ground. | Pill-shaped badges and status indicators, card corners of up to 20 pixels |
 | Icons are SVG, drawn by `<app-icon>`. | 58 emoji and symbol characters, including the favicon |
 | Text says what the product does and names its numbers. No em or en dashes, no exclamation marks, no claims the code does not back. | "train smarter, swing harder, and play like a pro", "AI-powered technique feedback", "ELITE LEVEL! Professional-grade mechanics!", "up to 150+ km/h" |

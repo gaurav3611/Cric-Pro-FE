@@ -11,6 +11,8 @@ export interface BluetoothHandlers {
   /** Called at each step of connecting, with a line for the event log. */
   progress: (message: string) => void;
   sample: (sample: SensorSample) => void;
+  /** Called with the battery level in percent, only when the bat reports one. */
+  battery: (percent: number) => void;
   disconnected: () => void;
 }
 
@@ -35,7 +37,7 @@ export class BluetoothService {
   async connect(handlers: BluetoothHandlers): Promise<string> {
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: BLE_NAME_PREFIX }, { services: [BLE_SERVICE_UUID] }],
-      optionalServices: [BLE_SERVICE_UUID],
+      optionalServices: [BLE_SERVICE_UUID, 'battery_service'],
     });
     this.device = device;
 
@@ -58,7 +60,22 @@ export class BluetoothService {
       if (sample) handlers.sample(sample);
     });
 
+    await this.subscribeBattery(server, handlers.battery);
     return device.name || '';
+  }
+
+  /** The standard battery level, sent only by firmware built with HAS_BATTERY_SENSE 1. */
+  private async subscribeBattery(server: BluetoothRemoteGATTServer, report: (percent: number) => void): Promise<void> {
+    try {
+      const level = await (await server.getPrimaryService('battery_service')).getCharacteristic('battery_level');
+      level.addEventListener('characteristicvaluechanged', () => {
+        if (level.value) report(level.value.getUint8(0));
+      });
+      report((await level.readValue()).getUint8(0));
+      await level.startNotifications();
+    } catch {
+      // No battery service on this bat. The sensor works without it.
+    }
   }
 
   disconnect(): void {

@@ -3,6 +3,7 @@ import { ShotHistoryService } from '../../analysis/shot-history.service';
 import { goldenShots, goldenSteps, reworded, stepAfterShot } from '../../testing/golden';
 import { useMemoryStorage } from '../../testing/memory-storage';
 import { LiveSessionStore } from './live-session.store';
+import { BluetoothHandlers, BluetoothService } from '../../sensor/bluetooth.service';
 
 /**
  * Runs the recorded scenario through the store, with no browser and no canvas, and checks
@@ -150,6 +151,73 @@ describe('LiveSessionStore, against the recording of the original dashboard', ()
       expect(store.statusText()).toBe('STANDBY');
     } finally {
       vi.useRealTimers();
+    }
+  });
+});
+
+describe('LiveSessionStore, battery level', () => {
+  it('shows the level the bat reports, hides 0, and forgets it on disconnect', async () => {
+    useMemoryStorage();
+    let handlers!: BluetoothHandlers;
+    const fake = {
+      supported: true,
+      connected: true,
+      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SwingLab-Bat'),
+      disconnect: () => {},
+    };
+    TestBed.configureTestingModule({
+      providers: [LiveSessionStore, { provide: BluetoothService, useValue: fake }],
+    });
+    const store = TestBed.inject(LiveSessionStore);
+    try {
+      await store.connectBluetooth();
+      expect(store.batteryPercent()).toBeNull();
+      handlers.battery(76);
+      expect(store.batteryPercent()).toBe(76);
+      handlers.battery(0);
+      expect(store.batteryPercent()).toBeNull();
+      handlers.battery(40);
+      handlers.disconnected();
+      expect(store.batteryPercent()).toBeNull();
+    } finally {
+      store.destroy();
+    }
+  });
+});
+
+describe('LiveSessionStore, auto record', () => {
+  it('saves a swing as a shot without START, and keeps the setting', async () => {
+    useMemoryStorage();
+    let handlers!: BluetoothHandlers;
+    const fake = {
+      supported: true,
+      connected: true,
+      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SwingLab-Bat'),
+      disconnect: () => {},
+    };
+    TestBed.configureTestingModule({
+      providers: [LiveSessionStore, { provide: BluetoothService, useValue: fake }],
+    });
+    const store = TestBed.inject(LiveSessionStore);
+    try {
+      await store.connectBluetooth();
+      const reading = (gz: number) => ({ ax: 0, ay: 0, az: 1, gx: 0, gy: 0, gz });
+      const swing = () => {
+        for (let i = 0; i < 60; i++) handlers.sample(reading(0));
+        for (let i = 0; i < 30; i++) handlers.sample(reading(800)); // about 43 km/h
+        for (let i = 0; i < 30; i++) handlers.sample(reading(0));
+      };
+      swing();
+      expect(store.shots().length).toBe(0); // off by default
+
+      store.setAutoRecord(true);
+      swing();
+      expect(store.shots().length).toBe(1);
+      expect(store.shots()[0].peakSpeed).toBeGreaterThan(40);
+      expect(store.recording()).toBe(false);
+      expect(localStorage.getItem('swinglab.autoRecord')).toBe('true');
+    } finally {
+      store.destroy();
     }
   });
 });

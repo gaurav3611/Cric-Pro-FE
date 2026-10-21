@@ -17,7 +17,9 @@ import {
   summariseSession,
   swingScore,
 } from '../../analysis/swing-analysis';
+import { SwingDetector } from '../../analysis/swing-detector';
 import { ToastService } from '../../core/toast.service';
+import { PALETTE } from '../../shared/palette';
 import { BluetoothService } from '../../sensor/bluetooth.service';
 import { DEMO_TICK_MS, demoSample } from '../../sensor/demo-data';
 import { IconName } from '../../shared/icon-data';
@@ -74,13 +76,35 @@ const allBadges = (text: string): BadgeState => ({
 
 const EMPTY_KPI: KpiState = { speed: '--', impact: '--', control: '--', follow: '--' };
 const DIRECTION_LABEL: Record<ShotDirection, [string, string]> = {
-  leg: ['LEG SIDE', '#00d4ff'],
-  off: ['OFF SIDE', '#ff6b00'],
-  straight: ['STRAIGHT DRIVE', '#00ff88'],
+  leg: ['LEG SIDE', PALETTE.leg],
+  off: ['OFF SIDE', PALETTE.ochre],
+  straight: ['STRAIGHT DRIVE', PALETTE.green],
 };
 /** Full scale of the bars under "Gyroscope Axes" and "Accelerometer". The original's numbers. */
 const GYRO_BAR_MAX = 10;
 const ACCEL_BAR_MAX = 20;
+
+const MANUAL_HELP =
+  'Click START SHOT, swing the bat, then click STOP & SAVE SHOT. Everything between the two clicks is saved as one shot.';
+const AUTO_HELP =
+  'Auto record is on: swing the bat and each shot is saved by itself. START SHOT still works.';
+
+function readSetting(key: string, fallback: boolean): boolean {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : value === 'true';
+  } catch {
+    return fallback;
+  }
+}
+
+function writeSetting(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // Storage blocked, for example in a private window: the setting lasts for this visit only.
+  }
+}
 
 /**
  * Everything the live view knows and does: the sensor, recording shots, the numbers on screen.
@@ -101,6 +125,11 @@ export class LiveSessionStore {
   // ---- header
   readonly sensorOn = signal(false);
   readonly sensorText = signal('NO SENSOR');
+  /** Settings, kept in the browser between visits. */
+  readonly autoRecord = signal(readSetting('swinglab.autoRecord', false));
+  readonly trackBattery = signal(readSetting('swinglab.trackBattery', true));
+  /** Battery percent of the connected bat, or null when it reports none. */
+  readonly batteryPercent = signal<number | null>(null);
   readonly statusLive = signal(false);
   readonly statusText = signal('STANDBY');
   readonly liveMode = signal('');
@@ -108,9 +137,7 @@ export class LiveSessionStore {
   // ---- live view
   readonly recording = signal(false);
   readonly swingStatus = signal('READY TO SWING');
-  readonly swingHelp = signal(
-    'Click START SHOT, swing the bat, then click STOP & SAVE SHOT. Everything between the two clicks is saved as one shot.',
-  );
+  readonly swingHelp = signal(this.autoRecord() ? AUTO_HELP : MANUAL_HELP);
   readonly shots = signal<Shot[]>([]);
   readonly shotCount = computed(() => this.shots().length);
   readonly kpiActive = signal(false);
@@ -156,6 +183,22 @@ export class LiveSessionStore {
   private sensorActive = false;
   private demoRunning = false;
   private demoTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly detector = new SwingDetector();
+
+  // ------------------------------------------------------------------ settings
+
+  setAutoRecord(on: boolean): void {
+    this.autoRecord.set(on);
+    writeSetting('swinglab.autoRecord', on);
+    this.detector.reset();
+    if (!this.recording()) this.swingHelp.set(on ? AUTO_HELP : MANUAL_HELP);
+    this.logEvent('info', on ? 'Auto record on' : 'Auto record off');
+  }
+
+  setTrackBattery(on: boolean): void {
+    this.trackBattery.set(on);
+    writeSetting('swinglab.trackBattery', on);
+  }
 
   // ------------------------------------------------------------------ demo mode
 
@@ -213,6 +256,8 @@ export class LiveSessionStore {
       const name = await this.bluetooth.connect({
         progress: (message) => this.logEvent('bluetooth', message),
         sample: (sample) => this.processData(sample),
+        // 0 is what the firmware sends when it sees no battery, for example on USB with the switch off.
+        battery: (percent) => this.batteryPercent.set(percent > 0 ? percent : null),
         disconnected: () => this.onDisconnected(),
       });
       this.sensorActive = true;
@@ -234,6 +279,8 @@ export class LiveSessionStore {
     this.sensorActive = false;
     this.sensorOn.set(false);
     this.sensorText.set('NO SENSOR');
+    this.batteryPercent.set(null);
+    this.detector.reset();
     this.statusLive.set(false);
     this.statusText.set('STANDBY');
     this.toast.show('Bluetooth disconnected', 'info');
@@ -368,9 +415,15 @@ export class LiveSessionStore {
 
   // ------------------------------------------------------------------ readings
 
-  /** Takes one reading from the sensor. Readings outside a shot are ignored. */
+  /** Takes one reading from the sensor. Outside a shot it only goes to the swing detector, when auto record is on. */
   processData(sample: SensorSample): void {
-    if (!this.recording()) return;
+    if (!this.recording()) {
+      if (this.autoRecord() && this.sensorActive) {
+        const swing = this.detector.push(sample);
+        if (swing) this.recordAutoShot(swing);
+      }
+      return;
+    }
 
     this.sessionData.push(sample);
     this.currentSwing.push(sample);
@@ -415,6 +468,14 @@ export class LiveSessionStore {
       speed: this.smoothedSpeed.toFixed(1),
       impact: acc.toFixed(1),
     }));
+  }
+
+  /** A swing the detector found goes through START SHOT and STOP & SAVE SHOT, like one recorded by hand. */
+  private recordAutoShot(swing: SensorSample[]): void {
+    this.startShot();
+    swing.forEach((sample) => this.processData(sample));
+    this.stopShot();
+    this.swingHelp.set(AUTO_HELP);
   }
 
   // ------------------------------------------------------------------ event log
