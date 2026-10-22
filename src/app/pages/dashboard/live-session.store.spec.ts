@@ -162,7 +162,7 @@ describe('LiveSessionStore, battery level', () => {
     const fake = {
       supported: true,
       connected: true,
-      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SwingLab-Bat'),
+      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SSwinGG-Bat'),
       disconnect: () => {},
     };
     TestBed.configureTestingModule({
@@ -192,7 +192,7 @@ describe('LiveSessionStore, auto record', () => {
     const fake = {
       supported: true,
       connected: true,
-      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SwingLab-Bat'),
+      connect: async (h: BluetoothHandlers) => ((handlers = h), 'SSwinGG-Bat'),
       disconnect: () => {},
     };
     TestBed.configureTestingModule({

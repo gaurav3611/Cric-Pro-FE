@@ -48,7 +48,7 @@ try {
   await chrome.send("Page.navigate", { url: base + "/" });
   await chrome.until("!!document.getElementById('loginFormEl')");
   expectEqual("the start address leads to the login page", await hash(), "#/login");
-  expectEqual("the login page has its title", await chrome.js("document.title"), "CricPro | Cricket Bat Swing Analyzer");
+  expectEqual("the login page has its title", await chrome.js("document.title"), "SSwinGG | Cricket Bat Swing Analyzer");
   check("the login stylesheet is applied", await chrome.js("getComputedStyle(document.querySelector('.brand-logo')).fontFamily.includes('Source Serif 4')"));
   expectEqual("the left panel lists four things the product does, each with a drawn icon",
     await chrome.js("[...document.querySelectorAll('.feature-item')].map(f => f.querySelector('svg[data-icon] > *') instanceof SVGElement && f.querySelector('strong').textContent.trim())"),
@@ -155,6 +155,19 @@ try {
   await sleep(300);
   expectEqual("BACK stops the demo and shows the saved shot on Home", [await text("#bleText"), await text("#statusText"), await text("#homeShotCount"), await text("#statSwings")], ["NO SENSOR", "STANDBY", "1 shot", "1"]);
   await design("the Home view with a saved shot");
+
+  await chrome.click("#clearShotsBtn");
+  await sleep(150);
+  expectEqual("CLEAR warns before deleting and offers both ways", await chrome.js("[document.getElementById('clearOverlay').classList.contains('visible'), document.getElementById('clearAllBtn').textContent.trim(), document.getElementById('clearChooseBtn').textContent.trim()]"), [true, "Delete all 1 shot", "Choose shots"]);
+  await design("the warning before shots are deleted");
+  await chrome.click("#clearChooseBtn");
+  await chrome.click("#homeShotsGrid .shot-card");
+  await sleep(150);
+  expectEqual("choosing marks the shot and opens no detail window", await chrome.js("[document.querySelector('#homeShotsGrid .shot-card').classList.contains('selected'), document.getElementById('selectCount').textContent.trim(), document.getElementById('shotDetailOverlay').classList.contains('visible')]"), [true, "1 selected", false]);
+  await design("the Home view while shots are chosen");
+  await chrome.click("#cancelSelectBtn");
+  await sleep(150);
+  expectEqual("Cancel keeps the shot", await chrome.js("JSON.parse(localStorage.getItem('sswingg_shots')).length"), 1);
   expectEqual("nothing follows the pointer or reacts to scrolling", await pointerAndScrollListeners(chrome), []);
 
   await chrome.click("#startShotBtn");
@@ -164,14 +177,14 @@ try {
   // ---- signing out
   await chrome.click("#logoutBtn");
   await chrome.until("location.hash === '#/login'", 6000);
-  expectEqual("logout forgets the demo user", await chrome.js("localStorage.getItem('cricpro_demo_user')"), null);
-  expectEqual("the saved shot stays in the browser", await chrome.js("JSON.parse(localStorage.getItem('swinglab_shots')).length"), 1);
+  expectEqual("logout forgets the demo user", await chrome.js("localStorage.getItem('sswingg_demo_user')"), null);
+  expectEqual("the saved shot stays in the browser", await chrome.js("JSON.parse(localStorage.getItem('sswingg_shots')).length"), 1);
   await chrome.send("Page.navigate", { url: base + "/#/dashboard/home" });
   await sleep(600);
   expectEqual("the dashboard is closed again after logout", await hash(), "#/login");
 
   // ---- a demo user stored by another tab is accepted without a reload
-  await chrome.js("localStorage.setItem('cricpro_demo_user', JSON.stringify({ email: 'other@example.org', displayName: 'Other Tab', uid: 'demo-2' }))");
+  await chrome.js("localStorage.setItem('sswingg_demo_user', JSON.stringify({ email: 'other@example.org', displayName: 'Other Tab', uid: 'demo-2' }))");
   await chrome.js("location.hash = '#/dashboard/home'");
   await chrome.until("location.hash === '#/dashboard/home' && !!document.getElementById('userName')", 6000);
   expectEqual("a demo user stored by another tab is accepted", await text("#userName"), "Other Tab");

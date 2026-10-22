@@ -36,7 +36,8 @@ export class BluetoothService {
    */
   async connect(handlers: BluetoothHandlers): Promise<string> {
     const device = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: BLE_NAME_PREFIX }, { services: [BLE_SERVICE_UUID] }],
+      // 'SwingLab' is for bats flashed before the rename.
+      filters: [{ namePrefix: BLE_NAME_PREFIX }, { namePrefix: 'SwingLab' }, { services: [BLE_SERVICE_UUID] }],
       optionalServices: [BLE_SERVICE_UUID, 'battery_service'],
     });
     this.device = device;

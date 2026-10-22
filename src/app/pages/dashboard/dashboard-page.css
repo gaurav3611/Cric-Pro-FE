@@ -422,12 +422,12 @@ header {
   padding: 11px 24px;
 }
 .btn-stop:hover { background: #962014; border-color: #962014; }
-.btn-back, .toggle {
+.btn-back, .btn-cancel, .toggle {
   background: var(--surface);
   color: var(--text);
   border-color: var(--border);
 }
-.btn-back:hover, .toggle:hover { border-color: var(--muted); }
+.btn-back:hover, .btn-cancel:hover, .toggle:hover { border-color: var(--muted); }
 /* A setting: a checkbox with its name, drawn like a secondary button. */
 .toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .toggle input { margin: 0; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
@@ -921,3 +921,25 @@ canvas { display: block; max-width: 100%; }
   * { transition: none !important; }
   .spinner { animation-duration: 2.4s; }
 }
+
+/* ---- Deleting shots: the warning, the selection bar, the check on a card ---- */
+.clear-dialog { max-width: 480px; }
+.clear-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.select-bar {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-top: 12px; padding: 10px 12px;
+  background: var(--red-soft);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+}
+.select-bar span { flex: 1; font-weight: 600; color: var(--text); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.shot-check {
+  display: none;
+  position: absolute; top: 10px; right: 10px;
+  width: 18px; height: 18px;
+  border: 2px solid var(--muted); border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.shots-grid.selecting .shot-check { display: block; }
+.shot-card.selected { border-color: var(--red); background: var(--red-soft); }
+.shot-card.selected .shot-check { background: var(--red); border-color: var(--red); }

@@ -21,7 +21,7 @@ export interface AppUser {
 }
 
 /** Where the demo user is kept. The original site used the same key. */
-const DEMO_USER_KEY = 'cricpro_demo_user';
+const DEMO_USER_KEY = 'sswingg_demo_user';
 const PLACEHOLDER_KEY = 'YOUR_API_KEY';
 
 function toAppUser(user: User): AppUser {

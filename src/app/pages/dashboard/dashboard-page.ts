@@ -7,7 +7,6 @@ import {
   effect,
   inject,
   input,
-  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -52,7 +51,6 @@ export class DashboardPage implements OnDestroy {
   private readonly router = inject(Router);
   private readonly probe = inject(ParityProbe);
   private readonly history = inject(ShotHistoryService);
-  private readonly home = viewChild.required(HomeView);
 
   protected readonly activeView = computed<DashboardView>(() =>
     this.view() === 'live' ? 'live' : 'home',
@@ -74,10 +72,9 @@ export class DashboardPage implements OnDestroy {
     void this.router.navigate(['/dashboard', view]);
   }
 
-  /** The BACK button of the live view. Unlike the Home button in the header, it reloads the Home view's data. */
+  /** The BACK button of the live view. Home reloads its data itself when it is shown. */
   protected goBackHome(): void {
     this.store.leaveLiveView();
-    this.home().refresh();
   }
 
   protected async logout(): Promise<void> {
@@ -87,8 +84,7 @@ export class DashboardPage implements OnDestroy {
 
   ngOnDestroy(): void {
     this.store.destroy();
-    if (environment.testHooks)
-      delete (window as unknown as Record<string, unknown>)['sswinggTest'];
+    if (environment.testHooks) delete (window as unknown as Record<string, unknown>)['sswinggTest'];
   }
 
   /** Lets tools/parity.mjs feed readings and read state. Only in builds with testHooks on. */

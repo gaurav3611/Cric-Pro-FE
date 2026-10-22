@@ -72,11 +72,11 @@ The owner asked for the generic look to go: purple gradients, pill shapes, emoji
 ## Rules that keep its behaviour identical to the original
 
 - **Formulas are copied step for step.** In `swing-analysis.ts`, keep the constants and the order of operations. A reordered multiplication can change a last digit, and the parity check compares numbers.
-- **The store mirrors the original script.** Each method of `LiveSessionStore` matches a function of the original `dashboard.html`. Odd behaviour is usually deliberate: the speed chart is not redrawn when a shot is saved, the Home button does not reload data, counts keep their old text. The README lists these. Do not tidy them away.
+- **The store mirrors the original script.** Each method of `LiveSessionStore` matches a function of the original `dashboard.html`. Odd behaviour is usually deliberate: the speed chart is not redrawn when a shot is saved, counts keep their old text. Home reloads its data each time it is shown, in both apps, so recorded shots appear there. The README lists these. Do not tidy them away.
 - **Both views stay mounted.** `DashboardPage` shows Home or Live by `display`, and `dashboard/:view` reuses the component. Do not turn the views into separate routes, or a session would be lost when the user visits Home.
 - **Page components use `ViewEncapsulation.None`.** The page stylesheets style `body` and `:root`, so they cannot be scoped. Angular removes each stylesheet when its page is left. `src/styles.css` gives every component element `display: contents` so the CSS sees the original parent and child structure. A new component under a page needs its selector added there. `app-icon` is the exception: it is a box and styles itself.
 - **three.js stays at r128.** Newer releases light the scene differently.
-- **Storage keys are shared with the original site.** `swinglab_shots` and `cricpro_demo_user`. Renaming them discards users' data.
+- **Storage keys are shared with the original site.** `sswingg_shots` and `sswingg_demo_user`. `ShotHistoryService` moves shots from the old key `swinglab_shots` once. Renaming a key again needs the same kind of move, or users lose their data.
 - **The Bluetooth names and scales must match the firmware.** They are in `sensor/sensor-packet.ts`. Do not change them without a matching firmware change.
 
 To change behaviour on purpose: change the original too and run `npm run parity:record`, or add the difference to the table in the README and update the checks to state the new behaviour. To change only a text, use the wording list, see rule 5 at the top.
@@ -92,7 +92,7 @@ To change behaviour on purpose: change the original too and run `npm run parity:
 
 | Check | Proves |
 |---|---|
-| `npm run parity` | For nine fixed shots, every text, colour, chart content and stored value matches the original, at 43 points. Texts are compared after the listed wording changes are applied. |
+| `npm run parity` | For nine fixed shots, every text, colour, chart content and stored value matches the original, at 46 points, including deleting all shots or chosen ones. Texts are compared after the listed wording changes are applied. |
 | `npm test` | The analysis functions and the store match the recording, plus scoring boundaries, packets, storage, the guard |
 | `npm run smoke` | Login forms, guard, the random demo, 3D view, shot detail, logout, and the design rules on seven screens |
 

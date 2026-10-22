@@ -1,5 +1,5 @@
 /*
-  The look of the login page: the panel that says what CricPro does, and the two forms.
+  The look of the login page: the panel that says what SSwinGG does, and the two forms.
 
   This file began as a copy of Cricket/frontend/css/main.css and css/auth.css. It keeps their
   class names, layout, fonts and colours. Rules that no element of this page uses were left
@@ -224,7 +224,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   position: relative;
 }
 
-/* ---- Left panel: what CricPro does ---- */
+/* ---- Left panel: what SSwinGG does ---- */
 /* A boundary arc and the 30-yard circle run off its upper right corner, clear of the text. */
 .auth-branding {
   flex: 1;
