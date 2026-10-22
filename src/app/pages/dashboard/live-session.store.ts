@@ -126,8 +126,8 @@ export class LiveSessionStore {
   readonly sensorOn = signal(false);
   readonly sensorText = signal('NO SENSOR');
   /** Settings, kept in the browser between visits. */
-  readonly autoRecord = signal(readSetting('swinglab.autoRecord', false));
-  readonly trackBattery = signal(readSetting('swinglab.trackBattery', true));
+  readonly autoRecord = signal(readSetting('sswingg.autoRecord', false));
+  readonly trackBattery = signal(readSetting('sswingg.trackBattery', true));
   /** Battery percent of the connected bat, or null when it reports none. */
   readonly batteryPercent = signal<number | null>(null);
   readonly statusLive = signal(false);
@@ -155,7 +155,7 @@ export class LiveSessionStore {
     left: null,
     top: null,
   });
-  readonly log = signal<LogEntry[]>([{ icon: 'info', message: 'SwingLab ready', time: '--:--' }]);
+  readonly log = signal<LogEntry[]>([{ icon: 'info', message: 'SSwinGG ready', time: '--:--' }]);
   readonly summary = signal<SessionSummary | null>(null);
   readonly chartNavInfo = signal('Showing live data');
 
@@ -189,7 +189,7 @@ export class LiveSessionStore {
 
   setAutoRecord(on: boolean): void {
     this.autoRecord.set(on);
-    writeSetting('swinglab.autoRecord', on);
+    writeSetting('sswingg.autoRecord', on);
     this.detector.reset();
     if (!this.recording()) this.swingHelp.set(on ? AUTO_HELP : MANUAL_HELP);
     this.logEvent('info', on ? 'Auto record on' : 'Auto record off');
@@ -197,7 +197,7 @@ export class LiveSessionStore {
 
   setTrackBattery(on: boolean): void {
     this.trackBattery.set(on);
-    writeSetting('swinglab.trackBattery', on);
+    writeSetting('sswingg.trackBattery', on);
   }
 
   // ------------------------------------------------------------------ demo mode
@@ -252,7 +252,7 @@ export class LiveSessionStore {
       return;
     }
     try {
-      this.logEvent('bluetooth', 'Scanning for SwingLab devices...');
+      this.logEvent('bluetooth', 'Scanning for SSwinGG devices...');
       const name = await this.bluetooth.connect({
         progress: (message) => this.logEvent('bluetooth', message),
         sample: (sample) => this.processData(sample),

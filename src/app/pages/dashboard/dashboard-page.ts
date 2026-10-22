@@ -88,12 +88,12 @@ export class DashboardPage implements OnDestroy {
   ngOnDestroy(): void {
     this.store.destroy();
     if (environment.testHooks)
-      delete (window as unknown as Record<string, unknown>)['swinglabTest'];
+      delete (window as unknown as Record<string, unknown>)['sswinggTest'];
   }
 
   /** Lets tools/parity.mjs feed readings and read state. Only in builds with testHooks on. */
   private installTestHooks(): void {
-    (window as unknown as Record<string, unknown>)['swinglabTest'] = {
+    (window as unknown as Record<string, unknown>)['sswinggTest'] = {
       simulateSensor: (name: string) => this.store.simulateSensor(name),
       feed: (samples: SensorSample[]) =>
         samples.forEach((sample) => this.store.processData(sample)),

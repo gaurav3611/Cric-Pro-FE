@@ -142,7 +142,7 @@
     },
     {
       "where": "text.aiAnalysisCard",
-      "from": "SwingLab AI Coach v2.0 | ",
+      "from": "SSwinGG AI Coach v2.0 | ",
       "to": "Rated on best speed, average impact and average accuracy. "
     },
     {
@@ -162,8 +162,8 @@
     },
     {
       "where": "lists.log",
-      "from": "🏏 SwingLab ready",
-      "to": "info SwingLab ready"
+      "from": "🏏 SSwinGG ready",
+      "to": "info SSwinGG ready"
     },
     {
       "where": "lists.log",

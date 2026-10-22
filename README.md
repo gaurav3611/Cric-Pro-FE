@@ -2,7 +2,7 @@
 
 **Version 0.2.0.** What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
-The frontend of SwingLab, a cricket bat swing analyzer, written as an Angular single-page app. Its login page carries the name CricPro.
+The frontend of SSwinGG, a cricket bat swing analyzer, written as an Angular single-page app. Its login page carries the name CricPro.
 
 It is a rewrite of the plain HTML and JavaScript frontend in the [Cricket](https://github.com/gaurav3611/Cricket) repository, `frontend/index.html` and `frontend/dashboard.html`. It behaves the same: every number, list and state the dashboard displays is checked against a recording of the original. Its look and its wording were then reworked on purpose, see [Design rules](#design-rules).
 
@@ -189,7 +189,7 @@ Kept on purpose, quirks included:
 - Counts and lists keep their last content when there is nothing new to show, for example the shot count after clearing the history.
 - The control score is 0 for any real swing, which keeps the accuracy at 40% or below.
 - A shot's direction comes from its last reading.
-- The login page says CricPro and the dashboard says SwingLab.
+- The login page says CricPro and the dashboard says SSwinGG.
 
 ## Not checked yet
 

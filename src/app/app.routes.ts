@@ -13,7 +13,7 @@ export const routes: Routes = [
     // :view is "home" or "live". Both are the same page component, so switching between them
     // keeps the running session, the charts and the 3D bat.
     path: 'dashboard/:view',
-    title: 'SwingLab | Cricket Bat Swing Analyzer Dashboard',
+    title: 'SSwinGG | Cricket Bat Swing Analyzer Dashboard',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/dashboard/dashboard-page').then((m) => m.DashboardPage),
   },

@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repository. Humans should start wi
 
 ## What this is
 
-The SwingLab web app as an Angular 21 single-page app: a login page and a dashboard with a Home view and a Live view. It talks to a bat sensor over Web Bluetooth and to a backend under `/api`.
+The SSwinGG web app as an Angular 21 single-page app: a login page and a dashboard with a Home view and a Live view. It talks to a bat sensor over Web Bluetooth and to a backend under `/api`.
 
 It is a rewrite of the plain HTML frontend in the [Cricket](https://github.com/gaurav3611/Cricket) repository, and it must keep behaving like it: same numbers, same states, same stored data. Its look and wording were reworked on purpose and follow the design rules below. Most rules in this file protect one of those two things.
 
@@ -86,7 +86,7 @@ To change behaviour on purpose: change the original too and run `npm run parity:
 - `AuthService` wraps Firebase Authentication. `authGuard` protects `dashboard/:view`.
 - Demo mode is on when `environment.firebase.apiKey` is `YOUR_API_KEY`, which is the case only in the `demo` build configuration. Any email then signs in and the user lives in `localStorage`.
 - The Firebase values in `src/environments/` are the public web config, the same ones the original site serves. They are not secrets. Never add a service account key or a user's token to this repository.
-- `window.swinglabTest` lets the parity tool feed readings. It is installed only when `environment.testHooks` is true, which is the demo build. Do not use it from app code.
+- `window.sswinggTest` lets the parity tool feed readings. It is installed only when `environment.testHooks` is true, which is the demo build. Do not use it from app code.
 
 ## Checks and tests
 

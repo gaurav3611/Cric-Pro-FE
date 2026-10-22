@@ -121,7 +121,7 @@ const PROBE = `(() => {
 })()`;
 
 // How each app is driven. The original exposes plain global functions. The Angular app exposes
-// window.swinglabTest, which exists only in builds made with test hooks switched on.
+// window.sswinggTest, which exists only in builds made with test hooks switched on.
 const ADAPTERS = {
   original: {
     dashboardPath: "/dashboard.html",
@@ -140,10 +140,10 @@ const ADAPTERS = {
   },
   angular: {
     dashboardPath: "/#/dashboard/home",
-    ready: "!!window.swinglabTest && !!document.getElementById('userName') && document.getElementById('userName').textContent !== 'Player'",
-    connect: "window.swinglabTest.simulateSensor('TEST BAT');",
-    feed: "(samples => window.swinglabTest.feed(samples))",
-    internals: "window.swinglabTest.internals()",
+    ready: "!!window.sswinggTest && !!document.getElementById('userName') && document.getElementById('userName').textContent !== 'Player'",
+    connect: "window.sswinggTest.simulateSensor('TEST BAT');",
+    feed: "(samples => window.sswinggTest.feed(samples))",
+    internals: "window.sswinggTest.internals()",
   },
 };
 
@@ -295,7 +295,7 @@ function reworded(page, changes, used) {
 if (mode === "record") {
   if (!existsSync(join(ORIGINAL, "dashboard.html"))) throw new Error("Original frontend not found at " + ORIGINAL + ". Pass --original <folder>.");
   // Work on a copy, with the Firebase key blanked so the page runs in its own demo mode. The original is never edited.
-  const copy = mkdtempSync(join(tmpdir(), "swinglab-original-"));
+  const copy = mkdtempSync(join(tmpdir(), "sswingg-original-"));
   cpSync(ORIGINAL, copy, { recursive: true });
   const configFile = join(copy, "js", "firebase-config.js");
   const config = readFileSync(configFile, "utf8");

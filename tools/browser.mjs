@@ -38,7 +38,7 @@ export function serve(root, api = () => null) {
 /** Starts headless Chrome with one blank page and returns a small client for it. */
 export async function openChrome({ chromePath = DEFAULT_CHROME, width = 1440, height = 1100 } = {}) {
   if (!existsSync(chromePath)) throw new Error("Chrome not found at " + chromePath + ". Pass --chrome <path> or set CHROME_PATH.");
-  const profile = mkdtempSync(join(tmpdir(), "swinglab-chrome-"));
+  const profile = mkdtempSync(join(tmpdir(), "sswingg-chrome-"));
   const port = 9300 + Math.floor(Math.random() * 400);
   // WebGL is needed for the 3D bat, so the software renderer is allowed.
   const proc = spawn(chromePath, ["--headless=new", `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, "--no-first-run", "--no-default-browser-check",

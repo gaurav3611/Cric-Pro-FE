@@ -105,7 +105,7 @@ try {
   await chrome.until("location.hash === '#/dashboard/home' && !!document.getElementById('userName')", 6000);
   await chrome.until("getComputedStyle(document.getElementById('sessionsLoading')).display === 'none'");
   expectEqual("the dashboard greets the user by the part of the email before the @", [await text("#userName"), await text("#userAvatar")], ["gaurav", "G"]);
-  expectEqual("the dashboard has its title", await chrome.js("document.title"), "SwingLab | Cricket Bat Swing Analyzer Dashboard");
+  expectEqual("the dashboard has its title", await chrome.js("document.title"), "SSwinGG | Cricket Bat Swing Analyzer Dashboard");
   check("the dashboard stylesheet replaced the login one", await chrome.js("getComputedStyle(document.body).backgroundColor !== '' && !document.querySelector('.auth-page')"));
   expectEqual("an empty account shows the empty state", await chrome.js("getComputedStyle(document.getElementById('noSessions')).display !== 'none'"), true);
   expectEqual("the header buttons carry drawn icons", await chrome.js("['navHome', 'navLive'].map(id => { const svg = document.querySelector('#' + id + ' svg'); return svg.getAttribute('data-icon') + ' ' + (svg.firstElementChild instanceof SVGGeometryElement) + ' ' + (svg.getBoundingClientRect().width > 8); })"), ["house true true", "radio true true"]);
@@ -129,7 +129,7 @@ try {
   await shot("3-recording");
   await chrome.click("#stopShotBtn");
   await sleep(400);
-  const after = await chrome.js(`(() => { const s = window.swinglabTest.internals(); return { shots: s.shots.length, points: s.shots[0].dataPoints, peak: s.shots[0].peakSpeed, chart: s.chart.data.length, accel: s.accelChart.length, card: document.querySelectorAll('#shotsGrid .shot-card').length, coach: !!document.getElementById('aiAnalysisCard') }; })()`);
+  const after = await chrome.js(`(() => { const s = window.sswinggTest.internals(); return { shots: s.shots.length, points: s.shots[0].dataPoints, peak: s.shots[0].peakSpeed, chart: s.chart.data.length, accel: s.accelChart.length, card: document.querySelectorAll('#shotsGrid .shot-card').length, coach: !!document.getElementById('aiAnalysisCard') }; })()`);
   check("the demo shot is saved with about two seconds of readings", after.shots === 1 && after.points >= 70 && after.points <= 100 && after.card === 1 && after.coach, JSON.stringify(after));
   check("the demo swing reaches a realistic speed", after.peak > 20 && after.peak < 60, "peak " + after.peak);
   check("both charts hold the readings", after.chart === after.points && after.accel === Math.min(after.points, 80), JSON.stringify(after));

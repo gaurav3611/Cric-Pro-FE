@@ -31,7 +31,7 @@ describe('LiveSessionStore, against the recording of the original dashboard', ()
 
   it('starts with an empty direction label and one line in the event log', () => {
     expect(store.direction().label).toBe('--');
-    expect(logLines()).toEqual(['info SwingLab ready']);
+    expect(logLines()).toEqual(['info SSwinGG ready']);
   });
 
   it('ignores readings that arrive outside a shot', () => {
@@ -215,7 +215,7 @@ describe('LiveSessionStore, auto record', () => {
       expect(store.shots().length).toBe(1);
       expect(store.shots()[0].peakSpeed).toBeGreaterThan(40);
       expect(store.recording()).toBe(false);
-      expect(localStorage.getItem('swinglab.autoRecord')).toBe('true');
+      expect(localStorage.getItem('sswingg.autoRecord')).toBe('true');
     } finally {
       store.destroy();
     }
