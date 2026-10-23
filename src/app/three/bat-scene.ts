@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { PALETTE } from '../shared/palette';
 
 /**
  * The 3D cricket bat and its swing trace, ported from Cricket/frontend/js/three-bat.js.
@@ -8,7 +10,36 @@ import * as THREE from 'three';
  *
  * update() and reset() work before init(), as they did in the original: the bat's rotation
  * is tracked from the first reading even if the scene is drawn later.
+ *
+ * Unlike the original, the bat turns about the hands, and the swing is traced as a band: the
+ * path of the whole blade, from its shoulder to its toe, coloured by bat speed. The rotation
+ * itself, which tools/parity.mjs compares, is worked out exactly as before. Only the way it is
+ * shown differs: the swing axis gy, which the dashboard's speed comes from, sweeps the face
+ * forward through an arc; gx turns the bat about its length; gz tilts it to the off or leg side.
+ * The original turned the model about its length with gy, so a swing looked like a twist.
  */
+
+/** Frames of path kept; a shot lasts a few seconds, so this is close to a minute. */
+const TRAIL_MAX = 3000;
+/** Where the hands hold the bat, as a distance above the middle of the bat model. */
+const HANDS = 0.85;
+/** The blade's shoulder and toe, in the turning group's own units. */
+const BLADE_TOP = 0.12 - HANDS;
+const BLADE_TOE = -1.1 - HANDS;
+/** From the side, like square leg: the swing's arc faces the camera. */
+const CAMERA_HOME = new THREE.Vector3(2.4, 0.6, 1.15);
+const LOOK_AT = new THREE.Vector3(0, 0.2, 0);
+const FLOOR = -0.75;
+
+const SLOW = new THREE.Color(PALETTE.green);
+const MEDIUM = new THREE.Color(PALETTE.ochre);
+const FAST = new THREE.Color(PALETTE.red);
+
+/** Bat speed to colour: green when slow, ochre at 60 km/h, red from 120 km/h. */
+export function speedColour(kmh: number, out = new THREE.Color()): THREE.Color {
+  const t = Math.min(1, Math.max(0, kmh / 120));
+  return t < 0.5 ? out.copy(SLOW).lerp(MEDIUM, t * 2) : out.copy(MEDIUM).lerp(FAST, (t - 0.5) * 2);
+}
 
 interface Rotation {
   x: number;
@@ -31,9 +62,15 @@ export class BatScene {
   private currentRot = zero();
   private integratedRot = zero();
   private glowIntensity = 0;
-  private orbitTime = 0;
   private lastTrailPoint: THREE.Vector3 | null = null;
   private frame = 0;
+  private controls: OrbitControls | null = null;
+  /** The speed of the latest reading, km/h, worked out as the dashboard does. */
+  private speedKmh = 0;
+  private trailCount = 0;
+  private band: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> | null = null;
+  private toeLine: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial> | null = null;
+  private readonly colour = new THREE.Color();
 
   private readonly onResize = (): void => {
     if (!this.container || !this.renderer || !this.camera) return;
@@ -57,8 +94,8 @@ export class BatScene {
 
     const height = container.offsetHeight || 420;
     const camera = new THREE.PerspectiveCamera(40, container.offsetWidth / height, 0.1, 100);
-    camera.position.set(1.2, 0.2, 3.0);
-    camera.lookAt(0, 0, 0);
+    camera.position.copy(CAMERA_HOME);
+    camera.lookAt(LOOK_AT);
     this.camera = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -75,12 +112,26 @@ export class BatScene {
     this.setupLighting(scene);
     this.buildEnvironment(scene);
 
-    // The bat: grip at the top, toe at the bottom.
+    // The bat: grip at the top, toe at the bottom. The group turns about the hands.
     const group = new THREE.Group();
-    group.add(this.buildCricketBat());
+    const bat = this.buildCricketBat();
+    bat.position.y = -HANDS;
+    group.add(bat);
     group.scale.setScalar(0.45);
+    group.position.y = 0.35;
     scene.add(group);
     this.group = group;
+
+    this.buildTrail(scene);
+
+    // Drag on the 3D view to turn it. No wheel zoom, so the page still scrolls over it.
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(LOOK_AT);
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.maxPolarAngle = Math.PI * 0.49; // never below the floor
+    controls.update();
+    this.controls = controls;
 
     window.addEventListener('resize', this.onResize);
     this.animate();
@@ -88,6 +139,10 @@ export class BatScene {
 
   /** Feeds one reading: rotation speeds in degrees per second and the total acceleration in g. */
   update(gy: number, gx: number, gz: number, impact: number): void {
+    // The same speed as the live readout: angular speed times a 0.85 m bat, under 5 deg/s is still.
+    const dps = Math.sqrt(gx * gx + gy * gy + gz * gz);
+    this.speedKmh = dps < 5 ? 0 : Math.min(180, ((dps * Math.PI) / 180) * 0.85 * 3.6);
+
     const dt = 0.022;
     this.integratedRot.x += ((gx * Math.PI) / 180) * dt;
     this.integratedRot.y += ((gy * Math.PI) / 180) * dt;
@@ -113,17 +168,26 @@ export class BatScene {
     this.targetRot = zero();
     this.integratedRot = zero();
     this.lastTrailPoint = null;
-    if (this.scene) {
-      const scene = this.scene;
-      const trail = scene.children.filter(
-        (child) => child.userData && child.userData['isTrail'],
-      ) as THREE.Mesh[];
-      trail.forEach((dot) => {
-        scene.remove(dot);
-        dot.geometry.dispose();
-        (dot.material as THREE.Material).dispose();
-      });
-    }
+    this.trailCount = 0;
+    this.band?.geometry.setDrawRange(0, 0);
+    this.toeLine?.geometry.setDrawRange(0, 0);
+  }
+
+  /** Moves the camera towards the bat (factor below 1) or away from it. */
+  zoom(factor: number): void {
+    if (!this.camera || !this.controls) return;
+    const offset = this.camera.position.clone().sub(this.controls.target);
+    const length = Math.min(9, Math.max(1.6, offset.length() * factor));
+    this.camera.position.copy(this.controls.target).add(offset.setLength(length));
+    this.controls.update();
+  }
+
+  /** The camera back where it started. */
+  resetView(): void {
+    if (!this.camera || !this.controls) return;
+    this.controls.target.copy(LOOK_AT);
+    this.camera.position.copy(CAMERA_HOME);
+    this.controls.update();
   }
 
   /** The rotation the bat is heading for. Used by tools/parity.mjs. */
@@ -141,6 +205,14 @@ export class BatScene {
   dispose(): void {
     cancelAnimationFrame(this.frame);
     window.removeEventListener('resize', this.onResize);
+    this.controls?.dispose();
+    this.controls = null;
+    for (const thing of [this.band, this.toeLine]) {
+      thing?.geometry.dispose();
+      thing?.material.dispose();
+    }
+    this.band = null;
+    this.toeLine = null;
     if (this.renderer) {
       this.renderer.dispose();
       this.renderer.domElement.remove();
@@ -176,6 +248,72 @@ export class BatScene {
     scene.add(under);
   }
 
+  /**
+   * The swing trace: a band through the blade's shoulder and toe at every frame, and a line
+   * along the toe. Both are filled in place up to TRAIL_MAX frames, so nothing new is created
+   * while the bat moves.
+   */
+  private buildTrail(scene: THREE.Scene): void {
+    const band = new THREE.BufferGeometry();
+    band.setAttribute(
+      'position',
+      new THREE.BufferAttribute(new Float32Array(TRAIL_MAX * 2 * 3), 3),
+    );
+    band.setAttribute('color', new THREE.BufferAttribute(new Float32Array(TRAIL_MAX * 2 * 3), 3));
+    const index: number[] = [];
+    for (let i = 0; i < TRAIL_MAX - 1; i++) {
+      const a = i * 2;
+      index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+    }
+    band.setIndex(index);
+    band.setDrawRange(0, 0);
+    this.band = new THREE.Mesh(
+      band,
+      new THREE.MeshBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      }),
+    );
+    this.band.frustumCulled = false;
+    scene.add(this.band);
+
+    const line = new THREE.BufferGeometry();
+    line.setAttribute('position', new THREE.BufferAttribute(new Float32Array(TRAIL_MAX * 3), 3));
+    line.setAttribute('color', new THREE.BufferAttribute(new Float32Array(TRAIL_MAX * 3), 3));
+    line.setDrawRange(0, 0);
+    this.toeLine = new THREE.Line(line, new THREE.LineBasicMaterial({ vertexColors: true }));
+    this.toeLine.frustumCulled = false;
+    scene.add(this.toeLine);
+  }
+
+  /** Adds the blade's place in this frame to the band and the toe line. */
+  private extendTrail(top: THREE.Vector3, toe: THREE.Vector3): void {
+    if (!this.band || !this.toeLine || this.trailCount >= TRAIL_MAX) return;
+    const i = this.trailCount++;
+    const colour = speedColour(this.speedKmh, this.colour);
+
+    const bandPos = this.band.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const bandCol = this.band.geometry.getAttribute('color') as THREE.BufferAttribute;
+    bandPos.setXYZ(i * 2, top.x, top.y, top.z);
+    bandPos.setXYZ(i * 2 + 1, toe.x, toe.y, toe.z);
+    bandCol.setXYZ(i * 2, colour.r, colour.g, colour.b);
+    bandCol.setXYZ(i * 2 + 1, colour.r, colour.g, colour.b);
+    bandPos.needsUpdate = true;
+    bandCol.needsUpdate = true;
+    this.band.geometry.setDrawRange(0, Math.max(0, i) * 6);
+
+    const linePos = this.toeLine.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const lineCol = this.toeLine.geometry.getAttribute('color') as THREE.BufferAttribute;
+    linePos.setXYZ(i, toe.x, toe.y, toe.z);
+    lineCol.setXYZ(i, colour.r, colour.g, colour.b);
+    linePos.needsUpdate = true;
+    lineCol.needsUpdate = true;
+    this.toeLine.geometry.setDrawRange(0, i + 1);
+  }
+
   private buildEnvironment(scene: THREE.Scene): void {
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(16, 16),
@@ -189,12 +327,12 @@ export class BatScene {
       }),
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -2.0;
+    ground.position.y = FLOOR;
     ground.receiveShadow = true;
     scene.add(ground);
 
     const grid = new THREE.GridHelper(12, 48, 0x1e5b3a, 0xb9c7b3);
-    grid.position.y = -1.99;
+    grid.position.y = FLOOR + 0.01;
     const gridMaterial = grid.material as THREE.Material;
     gridMaterial.transparent = true;
     gridMaterial.opacity = 0.35;
@@ -381,8 +519,8 @@ export class BatScene {
     this.currentRot.x += (this.targetRot.x - this.currentRot.x) * lerp;
     this.currentRot.y += (this.targetRot.y - this.currentRot.y) * lerp;
     this.currentRot.z += (this.targetRot.z - this.currentRot.z) * lerp;
-    group.rotation.x = this.currentRot.x;
-    group.rotation.y = this.currentRot.y;
+    group.rotation.x = -this.currentRot.y;
+    group.rotation.y = this.currentRot.x;
     group.rotation.z = this.currentRot.z;
 
     if (this.sweetSpot) {
@@ -399,9 +537,10 @@ export class BatScene {
       }
     }
 
-    // Swing trace: follow the toe of the bat.
-    const toeWorld = new THREE.Vector3(0, -1.1, 0);
-    group.localToWorld(toeWorld);
+    // Swing trace: the blade from its shoulder to its toe.
+    group.updateMatrixWorld();
+    const toeWorld = group.localToWorld(new THREE.Vector3(0, BLADE_TOE, 0));
+    const topWorld = group.localToWorld(new THREE.Vector3(0, BLADE_TOP, 0));
 
     if (!this.toeMarker) {
       this.toeMarker = new THREE.Mesh(
@@ -412,24 +551,12 @@ export class BatScene {
     }
     this.toeMarker.position.copy(toeWorld);
 
-    // Leave a dot wherever the toe has moved to. The dots stay until reset().
+    // Extend the trace wherever the toe has moved to. It stays until reset().
     const distance = this.lastTrailPoint ? toeWorld.distanceTo(this.lastTrailPoint) : 999;
     if (distance > 0.003) {
       this.lastTrailPoint = toeWorld.clone();
-      const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0xb42318 }),
-      );
-      dot.position.copy(toeWorld);
-      dot.userData['isTrail'] = true;
-      scene.add(dot);
+      this.extendTrail(topWorld, toeWorld);
     }
-
-    // The camera drifts slowly around the bat.
-    this.orbitTime += 0.004;
-    camera.position.x = 1.2 + Math.sin(this.orbitTime * 0.15) * 0.12;
-    camera.position.y = 0.2 + Math.cos(this.orbitTime * 0.1) * 0.05;
-    camera.lookAt(0, 0, 0);
 
     renderer.render(scene, camera);
   };

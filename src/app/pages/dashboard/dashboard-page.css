@@ -943,3 +943,18 @@ canvas { display: block; max-width: 100%; }
 .shots-grid.selecting .shot-check { display: block; }
 .shot-card.selected { border-color: var(--red); background: var(--red-soft); }
 .shot-card.selected .shot-check { background: var(--red); border-color: var(--red); }
+
+/* ---- Below the 3D view: what the colours mean, and the camera buttons ---- */
+.three-tools {
+  display: flex; flex-wrap: wrap; gap: 10px 16px;
+  align-items: center; justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.78rem; color: var(--muted);
+}
+.three-legend, .three-buttons { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.three-legend span { display: flex; align-items: center; gap: 6px; }
+.three-buttons .btn { padding: 6px 12px; font-size: 0.75rem; }
+.swatch { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.swatch.slow { background: var(--green); }
+.swatch.medium { background: var(--accent2); }
+.swatch.fast { background: var(--red); }
