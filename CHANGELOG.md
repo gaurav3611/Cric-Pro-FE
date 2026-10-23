@@ -9,4 +9,4 @@
 
 ## 0.1.0, 2026-10-12
 
-- First version: the Angular rewrite of the CricPro dashboard and login page, checked against a recording of the original.
+- First version: the Angular rewrite of the SSwinGG dashboard and login page, checked against a recording of the original.

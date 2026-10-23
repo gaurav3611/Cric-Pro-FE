@@ -47,12 +47,18 @@
       <div class="card-title">Recent Shots</div>
       <div style="display:flex;gap:8px;align-items:center;">
         <div class="card-badge" id="homeShotCount">{{ homeShotCount() }}</div>
-        <button class="nav-btn" (click)="clearShotHistory()" style="font-size:0.6rem;padding:5px 10px;">CLEAR</button>
+        <button class="nav-btn" id="clearShotsBtn" (click)="clearShotHistory()" style="font-size:0.6rem;padding:5px 10px;">CLEAR</button>
       </div>
     </div>
-    <div class="shots-grid" id="homeShotsGrid" style="margin-top:12px;">
+    <div class="select-bar" id="selectBar" [style.display]="selecting() ? 'flex' : 'none'">
+      <span id="selectCount">{{ selected().size }} selected</span>
+      <button class="btn btn-stop" id="deleteSelectedBtn" [disabled]="selected().size === 0" (click)="deleteSelected()">Delete selected</button>
+      <button class="btn btn-cancel" id="cancelSelectBtn" (click)="stopChoosing()">Cancel</button>
+    </div>
+    <div class="shots-grid" id="homeShotsGrid" style="margin-top:12px;" [class.selecting]="selecting()">
       @for (shot of homeShots(); track $index) {
-        <div class="shot-card {{ shot.grade }}" (click)="openShot(shot)">
+        <div class="shot-card {{ shot.grade }}" [class.selected]="isSelected(shot)" (click)="onShotClick(shot)">
+          <span class="shot-check"></span>
           <div class="shot-number">Shot #{{ shot.number }}</div>
           <div class="shot-speed">{{ shot.peakSpeed }}<span class="unit"> km/h</span></div>
           <div class="shot-meta">Accuracy: {{ shot.accuracy }}% · {{ shot.direction.toUpperCase() }}</div>
@@ -103,7 +109,7 @@
       <div class="action-card ble-card" (click)="store.connectBluetooth()">
         <div class="action-icon"><app-icon name="bluetooth" /></div>
         <h3>Connect Sensor</h3>
-        <p>Switch on the bat sensor, then pick the device whose name starts with SwingLab. Needs Chrome or Edge.</p>
+        <p>Switch on the bat sensor, then pick the device whose name starts with SSwinGG. Needs Chrome or Edge.</p>
         <button class="action-btn">CONNECT VIA BLUETOOTH</button>
       </div>
       <div class="action-card demo-card" (click)="store.startDemoMode()">
@@ -112,6 +118,21 @@
         <p>Runs the dashboard on simulated swings, so you can try it without a sensor.</p>
         <button class="action-btn">START DEMO</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- The warning before shots are deleted -->
+<div class="shot-detail-overlay" id="clearOverlay" [class.visible]="clearOpen()" (click)="onClearBackdrop($event)">
+  <div class="shot-detail-content clear-dialog" role="alertdialog" aria-labelledby="clearTitle" aria-describedby="clearText">
+    <div class="shot-detail-header">
+      <h2 id="clearTitle">Delete shots?</h2>
+      <p id="clearText">{{ clearText() }}</p>
+    </div>
+    <div class="clear-actions">
+      <button class="btn btn-cancel" id="clearCancelBtn" (click)="closeClear()">Cancel</button>
+      <button class="btn btn-cancel" id="clearChooseBtn" (click)="startChoosing()">Choose shots</button>
+      <button class="btn btn-stop" id="clearAllBtn" (click)="deleteAll()">Delete all {{ clearShots() }}</button>
     </div>
   </div>
 </div>

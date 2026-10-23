@@ -77,7 +77,7 @@ const SHOTS = [
 
 const DEMO_USER = { email: "asha@example.org", displayName: "Asha Rao", uid: "demo-1", team: "Blue" };
 const API = {
-  empty: { profile: { uid: "demo-user", email: "demo@cricpro.com", display_name: "Demo User", stats: { total_sessions: 0, total_swings: 0, best_score: 0, avg_speed: 0 } },
+  empty: { profile: { uid: "demo-user", email: "demo@sswingg.com", display_name: "Demo User", stats: { total_sessions: 0, total_swings: 0, best_score: 0, avg_speed: 0 } },
            sessions: { sessions: [] } },
   filled: { profile: { uid: "demo-user", stats: { total_sessions: 5, avg_speed: 84.5, best_score: 92, off_side_shots: 15, leg_side_shots: 20, total_swings: 120 } },
             sessions: { sessions: [
@@ -96,10 +96,10 @@ const PROBE = `(() => {
   for (const id of ["userName","userAvatar","bleText","statusText","liveMode","statSessions","statBestSpeed","statOffSide","statLegSide","statSwings",
       "homeShotCount","sessionCount","swingStatusText","swingHelpText","shotCounterDisplay","valSpeed","valImpact","valControl","valFollow",
       "badgeSpeed","badgeImpact","badgeControl","badgeFollow","chartNavInfo","scoreNum","scoreLabel","gxVal","gyVal","gzVal","axVal","ayVal","azVal",
-      "shotLabel","shotDetailTitle","shotDetailMetrics","shotDetailNoData","aiAnalysisCard"]) out.text[id] = text(byId(id));
+      "shotLabel","shotDetailTitle","shotDetailMetrics","shotDetailNoData","aiAnalysisCard","clearText","clearAllBtn","selectCount"]) out.text[id] = text(byId(id));
   for (const id of ["bleDot","statusDot","navHome","navLive","badgeSpeed","badgeImpact","badgeControl","badgeFollow","kpiSpeed","kpiImpact","kpiControl","kpiFollow",
-      "sectorLeg","sectorOff","sectorStraight","shotDetailOverlay"]) out.classes[id] = byId(id) ? [...byId(id).classList].sort().join(" ") : null;
-  for (const id of ["homeView","liveView","startShotBtn","stopShotBtn","shotsPanel","homeShotsCard","sessionsLoading","sessionList","noSessions","shotDetailChart","shotDetailNoData"])
+      "sectorLeg","sectorOff","sectorStraight","shotDetailOverlay","clearOverlay","homeShotsGrid"]) out.classes[id] = byId(id) ? [...byId(id).classList].sort().join(" ") : null;
+  for (const id of ["homeView","liveView","startShotBtn","stopShotBtn","shotsPanel","homeShotsCard","sessionsLoading","sessionList","noSessions","shotDetailChart","shotDetailNoData","selectBar"])
     out.shown[id] = byId(id) ? getComputedStyle(byId(id)).display !== "none" : null;
   for (const id of ["gxBar","gyBar","gzBar","axBar","ayBar","azBar"]) out.style[id] = byId(id) ? byId(id).style.width : null;
   const ring = byId("scoreFill"), marker = byId("batMarker"), label = byId("shotLabel");
@@ -135,7 +135,7 @@ const ADAPTERS = {
       accelChart: accelChart ? accelChart.data.datasets[0].data.slice() : null,
       detailChart: (typeof shotDetailChart !== "undefined" && shotDetailChart) ? { data: shotDetailChart.data.datasets[0].data.slice(), radius: [].concat(shotDetailChart.data.datasets[0].pointRadius) } : null,
       bat: typeof integratedRot !== "undefined" ? { x: integratedRot.x, y: integratedRot.y, z: integratedRot.z, tx: batTargetRot.x, ty: batTargetRot.y, tz: batTargetRot.z } : null,
-      stored: JSON.parse(localStorage.getItem("swinglab_shots") || "[]").map(s => ({ ...s, timestamp: null })),
+      stored: JSON.parse(localStorage.getItem("sswingg_shots") || "[]").map(s => ({ ...s, timestamp: null })),
     }))()`,
   },
   angular: {
@@ -169,7 +169,7 @@ async function run(kind, baseUrl, apiState) {
   try {
     // The demo user and an empty shot history are in place before any page script runs.
     await chrome.send("Page.addScriptToEvaluateOnNewDocument", { source:
-      `if (!sessionStorage.getItem("parityPrepared")) { sessionStorage.setItem("parityPrepared", "1"); localStorage.clear(); localStorage.setItem("cricpro_demo_user", ${JSON.stringify(JSON.stringify(DEMO_USER))}); }` });
+      `if (!sessionStorage.getItem("parityPrepared")) { sessionStorage.setItem("parityPrepared", "1"); localStorage.clear(); localStorage.setItem("sswingg_demo_user", ${JSON.stringify(JSON.stringify(DEMO_USER))}); }` });
     apiState.mode = "empty";
     await chrome.send("Page.navigate", { url: baseUrl + adapter.dashboardPath });
     await chrome.until(adapter.ready);
@@ -206,7 +206,7 @@ async function run(kind, baseUrl, apiState) {
     await snap("shot detail closed");
 
     await click("#navHome");
-    await snap("home via the header button: its data is not reloaded");
+    await snap("home via the header button: its data is reloaded");
     await click("#navLive");
     await sleep(300);
     await snap("live view opened again from the header");
@@ -221,9 +221,9 @@ async function run(kind, baseUrl, apiState) {
     await click(".shot-detail-close");
 
     // An old stored shot that has no speed profile, as older versions of the dashboard saved them.
-    await chrome.js(`(() => { const h = JSON.parse(localStorage.getItem("swinglab_shots") || "[]");
+    await chrome.js(`(() => { const h = JSON.parse(localStorage.getItem("sswingg_shots") || "[]");
       h.unshift({ number: 99, peakSpeed: 55.5, peakImpact: 9.9, accuracy: 44, controlScore: 12, direction: "off", followGrade: "WEAK", grade: "average", dataPoints: 77, timestamp: "2026-01-05T10:20:30.000Z" });
-      localStorage.setItem("swinglab_shots", JSON.stringify(h)); })()`);
+      localStorage.setItem("sswingg_shots", JSON.stringify(h)); })()`);
 
     // A fresh page load with stored shots and an API that has sessions and stats.
     apiState.mode = "filled";
@@ -242,12 +242,20 @@ async function run(kind, baseUrl, apiState) {
     await snap("shot detail for a stored shot with a speed profile, opened afterwards");
     await click(".shot-detail-close");
 
-    chrome.acceptDialogs = false;
-    await chrome.js("document.querySelector('#homeShotsCard .nav-btn').click()");
-    await snap("clear history, cancelled in the confirm box");
-    chrome.acceptDialogs = true;
-    await chrome.js("document.querySelector('#homeShotsCard .nav-btn').click()");
-    await snap("clear history, confirmed");
+    await click("#clearShotsBtn");
+    await snap("clear history: the warning");
+    await click("#clearCancelBtn");
+    await snap("clear history: cancelled, every shot kept");
+    await click("#clearShotsBtn");
+    await click("#clearChooseBtn");
+    await click("#homeShotsGrid .shot-card:nth-child(1)");
+    await click("#homeShotsGrid .shot-card:nth-child(3)");
+    await snap("clear history: two shots chosen");
+    await click("#deleteSelectedBtn");
+    await snap("clear history: the two chosen shots deleted");
+    await click("#clearShotsBtn");
+    await click("#clearAllBtn");
+    await snap("clear history: all deleted");
 
     return { steps, problems: chrome.problems };
   } finally {

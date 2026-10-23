@@ -89,6 +89,20 @@
     <div class="chart-card span3">
       <div class="card-title">3D Batsman Visualization</div>
       <div id="threeContainer" #threeContainer></div>
+      <div class="three-tools">
+        <div class="three-legend">
+          <span>Path of the blade, by bat speed:</span>
+          <span><i class="swatch slow"></i>slow</span>
+          <span><i class="swatch medium"></i>60 km/h</span>
+          <span><i class="swatch fast"></i>120 km/h and more</span>
+        </div>
+        <div class="three-buttons">
+          <span class="three-hint">Drag the view to turn it.</span>
+          <button class="btn toggle" (click)="zoom(0.8)">Zoom in</button>
+          <button class="btn toggle" (click)="zoom(1.25)">Zoom out</button>
+          <button class="btn toggle" (click)="resetView()">Reset view</button>
+        </div>
+      </div>
     </div>
 
     <div class="chart-card">

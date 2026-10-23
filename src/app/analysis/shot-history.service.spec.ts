@@ -25,9 +25,16 @@ describe('ShotHistoryService', () => {
     history = new ShotHistoryService();
   });
 
+  it('moves shots saved under the old key to the new one', () => {
+    localStorage.setItem('swinglab_shots', '[{"number":7}]');
+    const moved = new ShotHistoryService();
+    expect(moved.load()).toEqual([{ number: 7 }]);
+    expect(localStorage.getItem('swinglab_shots')).toBeNull();
+  });
+
   it('starts empty and survives unreadable storage', () => {
     expect(history.load()).toEqual([]);
-    localStorage.setItem('swinglab_shots', '{not json');
+    localStorage.setItem('sswingg_shots', '{not json');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     expect(history.load()).toEqual([]);
     warn.mockRestore();
@@ -36,7 +43,7 @@ describe('ShotHistoryService', () => {
   it('stores shots newest first, rounded to one decimal, under the original key', () => {
     history.save(shot(1));
     history.save(shot(2, { peakSpeed: 107.029, direction: 'leg' }));
-    const stored = JSON.parse(localStorage.getItem('swinglab_shots')!);
+    const stored = JSON.parse(localStorage.getItem('sswingg_shots')!);
     expect(stored.map((s: { number: number }) => s.number)).toEqual([2, 1]);
     expect(stored[0]).toEqual({
       number: 2,

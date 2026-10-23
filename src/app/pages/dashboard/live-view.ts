@@ -277,6 +277,14 @@ export class LiveView implements OnDestroy {
     }
   }
 
+  protected zoom(factor: number): void {
+    this.bat.zoom(factor);
+  }
+
+  protected resetView(): void {
+    this.bat.resetView();
+  }
+
   ngOnDestroy(): void {
     if (this.setupTimer) clearTimeout(this.setupTimer);
     this.speedChart?.destroy();

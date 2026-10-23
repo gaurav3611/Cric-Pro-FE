@@ -2,7 +2,7 @@
 
 **Version 0.2.0.** What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
-The frontend of SSwinGG, a cricket bat swing analyzer, written as an Angular single-page app. Its login page carries the name CricPro.
+The frontend of SSwinGG, a cricket bat swing analyzer, written as an Angular single-page app. Its login page carries the name SSwinGG.
 
 It is a rewrite of the plain HTML and JavaScript frontend in the [Cricket](https://github.com/gaurav3611/Cricket) repository, `frontend/index.html` and `frontend/dashboard.html`. It behaves the same: every number, list and state the dashboard displays is checked against a recording of the original. Its look and its wording were then reworked on purpose, see [Design rules](#design-rules).
 
@@ -59,7 +59,7 @@ Things to know:
 - **Addresses use a `#`.** The pages are `/#/login`, `/#/dashboard/home` and `/#/dashboard/live`. Everything after the `#` stays in the browser, so the app works on any static host with no rule for unknown paths.
 - **The API is expected on the same address, under `/api`.** In development, calls to `/api` are forwarded to `http://localhost:5050`, where the Java API or the Flask backend runs. See [proxy.conf.json](proxy.conf.json). Without an API the app still works: the session list is empty and the totals come from shots kept in the browser.
 - **Bluetooth needs Chrome or Edge**, on `https` or `localhost`.
-- **Saved data carries over.** Shots and the demo user are kept under the same browser storage keys as the original site, `swinglab_shots` and `cricpro_demo_user`.
+- **Saved data carries over.** Shots and the demo user are kept under the same browser storage keys as the original site, `sswingg_shots` and `sswingg_demo_user`. Shots saved under the old key `swinglab_shots` are moved over once.
 - **The two browser checks need Google Chrome.** Set `CHROME_PATH` if it is not in the usual place.
 
 ## With and without the backend
@@ -131,10 +131,10 @@ tools/                     parity.mjs and smoke.mjs, the recording and the list 
 
 The original frontend had no tests, so its behaviour was recorded and the recording is the reference.
 
-- **The recording.** `tools/parity.mjs record` opens the original dashboard in headless Chrome and feeds it nine fixed shots through its own functions. At 43 points it saves what the page shows: every number and label, badge colours, the score ring, shot cards, the coach's summary, chart contents, the 3D bat's rotation, and what was written to browser storage. The result is [tools/golden/original-dashboard.json](tools/golden/original-dashboard.json).
-- **Parity check.** `npm run parity` does the same with this app and compares. All 43 steps match. Where this app words something differently on purpose, the phrase is listed in [tools/golden/copy-changes.json](tools/golden/copy-changes.json), and the recorded text is rewritten with that list before it is compared. The numbers inside every text are therefore still the original's. A listed phrase that the recording does not contain fails the check.
+- **The recording.** `tools/parity.mjs record` opens the original dashboard in headless Chrome and feeds it nine fixed shots through its own functions, then deletes shots through the warning: two chosen ones, then all. At 46 points it saves what the page shows: every number and label, badge colours, the score ring, shot cards, the coach's summary, chart contents, the 3D bat's rotation, and what was written to browser storage. The result is [tools/golden/original-dashboard.json](tools/golden/original-dashboard.json).
+- **Parity check.** `npm run parity` does the same with this app and compares. All 46 steps match. Where this app words something differently on purpose, the phrase is listed in [tools/golden/copy-changes.json](tools/golden/copy-changes.json), and the recorded text is rewritten with that list before it is compared. The numbers inside every text are therefore still the original's. A listed phrase that the recording does not contain fails the check.
 - **Unit tests.** 37 tests. They run the same nine shots through the analysis functions and through the store, with no browser, and compare with the recording. They also cover the scoring boundaries, the packet format, stored shots, the simulated bat and the sign-in guard.
-- **Smoke test.** `npm run smoke` covers what the recording does not: the login and registration forms, the guard, the built-in demo with its random swings, the 3D view, the shot detail window and logout. On seven screens it also runs the [design rules](#design-rules). 49 checks in all.
+- **Smoke test.** `npm run smoke` covers what the recording does not: the login and registration forms, the guard, the built-in demo with its random swings, the 3D view, the shot detail window and logout. On seven screens it also runs the [design rules](#design-rules). It also opens the warning before shots are deleted and picks a shot to delete. 54 checks in all.
 - **Layout.** Right after the port, with both apps in the same state, the position and size of 39 elements on the login page, the Home view and the Live view were measured, and all 39 were identical. The redesign then changed corner radii, some paddings and two gaps, so the sizes no longer match to the pixel. This was not measured again.
 - **Proof the checks can fail.** 23 one-line changes were made to this app, one at a time: constants, thresholds, texts, a removed guard, behaviour the original does not have. Every one was caught by at least one check. Gaps found this way were closed. After the redesign, 20 more were made: 15 that each break a design rule, and 5 for the comparison with the original, namely two wrong numbers, a wrong icon, a changed remark and an unused wording rule. All 20 were caught.
 
@@ -185,11 +185,9 @@ How to work within them:
 Kept on purpose, quirks included:
 
 - The "Best Speed" tile shows the API's average speed when the API has stats.
-- The Home button in the header does not reload the Home view's data. The BACK button of the Live view does.
 - Counts and lists keep their last content when there is nothing new to show, for example the shot count after clearing the history.
 - The control score is 0 for any real swing, which keeps the accuracy at 40% or below.
 - A shot's direction comes from its last reading.
-- The login page says CricPro and the dashboard says SSwinGG.
 
 ## Not checked yet
 

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { ShotHistoryService, StoredShot } from '../../analysis/shot-history.service';
 import { ApiService, SessionRecord } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -19,9 +27,9 @@ interface SessionLine {
 /**
  * The Home view: totals, recent shots kept in the browser, and sessions from the API.
  *
- * Its data is loaded when the dashboard opens and again when the live view's BACK button is
- * pressed. Several details copy the original exactly, including that a tile or a list keeps
- * its last content when there is nothing new to put in it.
+ * Its data is loaded each time it is shown, by any button, and when a shot is saved while it
+ * is on screen. Several details copy the original exactly, including that a tile or a list
+ * keeps its last content when there is nothing new to put in it.
  */
 @Component({
   selector: 'app-home-view',
@@ -56,7 +64,12 @@ export class HomeView {
   protected readonly sessionCount = signal('0 sessions');
 
   constructor() {
-    this.refresh();
+    // Whenever Home is on screen, and again for each shot saved while it is (auto record keeps
+    // running with the bat connected), so every saved shot shows up here.
+    effect(() => {
+      this.history.saved();
+      if (this.active()) untracked(() => this.refresh());
+    });
   }
 
   /** Loads the totals, the session list and the recent shots again. */
@@ -160,7 +173,13 @@ export class HomeView {
     );
   }
 
-  protected openShot(shot: StoredShot): void {
+  /** A click on a card opens it, or picks it while shots are being chosen for deletion. */
+  protected onShotClick(shot: StoredShot): void {
+    if (this.selecting()) this.toggleShot(shot);
+    else this.openShot(shot);
+  }
+
+  private openShot(shot: StoredShot): void {
     this.detail.open({
       ...shot,
       timestamp: new Date(shot.timestamp),
@@ -168,12 +187,69 @@ export class HomeView {
     });
   }
 
+  // ---- deleting shots: a warning first, then all of them or the chosen ones ----
+
+  protected readonly clearOpen = signal(false);
+  protected readonly clearShots = signal('');
+  protected readonly clearText = signal('Deleted shots cannot be recovered.');
+  protected readonly selecting = signal(false);
+  protected readonly selected = signal<ReadonlySet<string>>(new Set());
+
+  protected isSelected(shot: StoredShot): boolean {
+    return this.selected().has(ShotHistoryService.key(shot));
+  }
+
   protected clearShotHistory(): void {
-    if (confirm('Clear all shot history?')) {
-      this.history.clear();
-      this.homeShotsVisible.set(false);
-      this.homeShots.set([]);
-      this.toast.show('Shot history cleared', 'info');
-    }
+    const n = this.history.load().length;
+    this.clearShots.set(n + ' shot' + (n !== 1 ? 's' : ''));
+    this.clearText.set(
+      'Deleted shots cannot be recovered. Delete all ' +
+        this.clearShots() +
+        ', or choose the ones to delete.',
+    );
+    this.clearOpen.set(true);
+  }
+
+  protected closeClear(): void {
+    this.clearOpen.set(false);
+  }
+
+  protected onClearBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeClear();
+  }
+
+  protected deleteAll(): void {
+    this.closeClear();
+    this.stopChoosing();
+    this.history.clear();
+    this.homeShotsVisible.set(false);
+    this.homeShots.set([]);
+    this.toast.show('Shot history cleared', 'info');
+  }
+
+  protected startChoosing(): void {
+    this.closeClear();
+    this.selected.set(new Set());
+    this.selecting.set(true);
+  }
+
+  protected stopChoosing(): void {
+    this.selecting.set(false);
+    this.selected.set(new Set());
+  }
+
+  private toggleShot(shot: StoredShot): void {
+    const key = ShotHistoryService.key(shot);
+    const next = new Set(this.selected());
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    this.selected.set(next);
+  }
+
+  protected deleteSelected(): void {
+    const n = this.history.remove(this.selected());
+    this.stopChoosing();
+    this.loadHomeShotHistory();
+    this.toast.show(n + ' shot' + (n !== 1 ? 's' : '') + ' deleted', 'info');
   }
 }

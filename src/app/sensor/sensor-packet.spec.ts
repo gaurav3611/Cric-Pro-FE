@@ -5,7 +5,7 @@ const packet = (hex: string) =>
 
 describe('decodeSensorPacket', () => {
   // These byte strings were produced by the bat firmware's own packet builder
-  // (Cricket/firmware/esp32c3-bmi160/03_swinglab_bat/swing_packet.h) for known sensor values.
+  // (hardware/stages/08_sswingg_bat/swing_packet.h) for known sensor values.
   it('reads packets built by the bat firmware', () => {
     expect(decodeSensorPacket(packet('0000000000100000000000000000'))).toEqual({
       ax: 0,
